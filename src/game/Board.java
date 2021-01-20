@@ -228,7 +228,6 @@ public class Board {
 		
 		if (index%BOARD_SIZE != 0)
 		{
-			// TODO probably redundant
 			if (hasIdenticalNeighbour(colour, left))
 				return left;
 		}
@@ -254,6 +253,8 @@ public class Board {
 	// else returns one of the indexes of the same colour neighbours
 	private int getIdenticalNeighbour(int index)
 	{
+		if (grid[index].equals(COLOUR.EMPTY)) return -1;
+		
 		int left = index-1;
 		int right = index+1;
 		int up = index-BOARD_SIZE;
@@ -261,7 +262,6 @@ public class Board {
 		
 		if (index%BOARD_SIZE != 0)
 		{
-			// TODO probably redundant
 			if (hasIdenticalNeighbour(index, left))
 				return left;
 		}
@@ -350,53 +350,49 @@ public class Board {
 		return false;
 	}
 	
-	// TODO refactor later to combine horizontal and vertical
-	private void moveHorizontal(boolean moveLeft, int n)
+	private void moveLine(int start, int direction, int step)
 	{
 		int counter = 0;
-		int start = moveLeft ? n*BOARD_SIZE : n*BOARD_SIZE + (BOARD_SIZE-1);
-		int direction = moveLeft ? 1 : -1;
 		while (counter != BOARD_SIZE)
 		{
-			int current = start+direction*counter;
-			if (!grid[current].equals(COLOUR.EMPTY))
+			int index = start+(direction*counter*step);
+			if (!grid[index].equals(COLOUR.EMPTY))
 			{
-				while(true)
+				int moveCounter = 1;
+				while (true)
 				{
-					int moveCounter = 1;
-					int previous = current-direction*moveCounter;
-					if (previous == start-direction) break;
+					int previous = index-(direction*moveCounter*step);
+					int current = index-(direction*(moveCounter-1)*step);
+					if (previous < 0 || previous > grid.length || previous == start-direction) break;
 					if (!grid[previous].equals(COLOUR.EMPTY)) break;
 					grid[previous] = grid[current];
 					grid[current] = COLOUR.EMPTY;
+					moveCounter++;
 				}
 			}
 			counter++;
 		}
 	}
 	
+	// TODO refactor later to combine horizontal and vertical
+	private void moveHorizontal(boolean moveLeft, int n)
+	{
+		//int counter = 0;
+		int start = moveLeft ? n*BOARD_SIZE : n*BOARD_SIZE + (BOARD_SIZE-1);
+		int direction = moveLeft ? 1 : -1;
+		int step = 1;
+		
+		moveLine(start, direction, step);
+	}
+	
 	private void moveVertical(boolean moveUp, int n)
 	{
-		int counter = 0;
+		//int counter = 0;
 		int start = moveUp ? n : n+(BOARD_SIZE*(BOARD_SIZE-1));
 		int direction = moveUp ? 1 : -1;
-		while (counter != BOARD_SIZE)
-		{
-			int current = start+(direction*counter*BOARD_SIZE);
-			if (!grid[current].equals(COLOUR.EMPTY))
-			{
-				while (true)
-				{
-					int moveCounter = 1;
-					int previous = current-(direction*moveCounter*BOARD_SIZE);
-					if (previous < 0 || previous > grid.length) break;
-					if (!grid[previous].equals(COLOUR.EMPTY)) break;
-					grid[previous] = grid[current];
-					grid[current] = COLOUR.EMPTY;
-				}
-			}
-			counter++;
-		}
+		int step = BOARD_SIZE;
+		
+		moveLine(start, direction, step);
 	}
 
 	private boolean horizontalHasEmpty(int n)
@@ -413,7 +409,6 @@ public class Board {
 	
 	private boolean verticalHasEmpty(int n)
 	{
-		// TODO remove redundant row variable
 		if (n>20)
 			n-=BOARD_SIZE;
 		for (int i=0; i<BOARD_SIZE; i++)
