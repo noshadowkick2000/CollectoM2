@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.List;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import game.Board;
@@ -15,14 +14,10 @@ class boardTests {
 	Board board;
 	
 	private static final int[] CORRECT_GRID_EXAMPLE = new int[] {5, 3, 4, 2, 5, 3, 6, 4, 6, 3, 4, 3, 1, 2, 5, 3, 2, 1, 2, 6, 5, 4, 1, 4, 0, 4, 1, 4, 5, 6, 2, 1, 5, 6, 2, 3, 1, 5, 4, 6, 5, 3, 6, 3, 6, 2, 1, 2, 1};
+	private static final String CORRECT_GRID_EXAMPLE_STRING = "5~3~4~2~5~3~6~4~6~3~4~3~1~2~5~3~2~1~2~6~5~4~1~4~0~4~1~4~5~6~2~1~5~6~2~3~1~5~4~6~5~3~6~3~6~2~1~2~1";
 	private static final int[] CORRECT_GRID_EXAMPLE_LEGAL_MOVES = new int[] {3, 10, 17, 24};
 	private static final int[] CORRECT_GRID_EXAMPLE_MOVE_THREE = new int[] {5, 3, 4, 2, 5, 3, 6, 4, 6, 3, 4, 3, 1, 2, 5, 3, 2, 1, 2, 6, 5, 4, 1, 0, 0, 1, 4, 0, 5, 6, 2, 1, 5, 6, 2, 3, 1, 5, 4, 6, 5, 3, 6, 3, 6, 2, 1, 2, 1};
 	private static final int[] ENDGAME_EXAMPLE = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 3, 0, 0, 5, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 6, 1, 0, 6};
-	
-	@BeforeEach
-	void setUp() throws Exception {
-		
-	}
 	
 	@Test
 	void passedArgumentGenerationTest()
@@ -49,7 +44,7 @@ class boardTests {
 		board = new Board(CORRECT_GRID_EXAMPLE);
 		Board copiedBoard = board.deepCopy();
 		copiedBoard.manuallyCalculateMoves();
-		assertNotNull(copiedBoard.makeSingleMove(copiedBoard.getPossibleMoves().get(0).move[0]));
+		assertNotNull(copiedBoard.makeMove(copiedBoard.getPossibleMoves().get(0).move));
 		assertNotEquals(board.grid, copiedBoard.grid);;
 	}
 
@@ -71,6 +66,7 @@ class boardTests {
 	void possibleMovesTest()
 	{
 		board = new Board(CORRECT_GRID_EXAMPLE);
+		assertFalse(board.noMovesLeft());
 		assertEquals(CORRECT_GRID_EXAMPLE_LEGAL_MOVES.length, board.getPossibleMoves().size());
 		assertEquals(CORRECT_GRID_EXAMPLE_LEGAL_MOVES[0], board.getPossibleMoves().get(0).move[0]);
 		assertEquals(CORRECT_GRID_EXAMPLE_LEGAL_MOVES[1], board.getPossibleMoves().get(1).move[0]);
@@ -82,7 +78,7 @@ class boardTests {
 	void moveTest()
 	{
 		board = new Board(CORRECT_GRID_EXAMPLE);
-		List<COLOUR> wonBalls = board.makeSingleMove(3);
+		List<COLOUR> wonBalls = board.makeMove(new int[] {3});
 		int counter = 0;
 		for (COLOUR c : board.grid)
 		{
@@ -92,5 +88,21 @@ class boardTests {
 		assertEquals(2, wonBalls.size());
 		assertEquals(COLOUR.ORANGE, wonBalls.get(0));
 		assertEquals(COLOUR.ORANGE, wonBalls.get(1));
+	}
+	
+	@Test
+	void illegalMoveTest()
+	{
+		board = new Board(ENDGAME_EXAMPLE);
+		List<COLOUR> wonBalls = board.makeMove(new int[] {0});
+
+		assertNull(wonBalls);
+	}
+	
+	@Test
+	void communicationTest()
+	{
+		board = new Board(CORRECT_GRID_EXAMPLE);
+		assertEquals(CORRECT_GRID_EXAMPLE_STRING, board.toCommunicationString());
 	}
 }

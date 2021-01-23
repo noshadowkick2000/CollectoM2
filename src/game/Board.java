@@ -5,17 +5,19 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import util.Communications;
+
 public class Board {
 
 	public class Move {
 		public Board board;
-		public int[] move = new int[] {UNINITIALIZED, UNINITIALIZED};
+		public int[] move;
 		public List<COLOUR> gainedBalls;
 
 		// move is the number of the move that results in the given board
 		public Move(Board board, int move, List<COLOUR> gainedBalls) {
 			this.board = board;
-			this.move[0] = move;
+			this.move = new int[] {move};
 			this.gainedBalls = gainedBalls;
 		}
 
@@ -30,7 +32,6 @@ public class Board {
 	public static final int BOARD_SIZE = 7;
 	public static final int CENTER = (BOARD_SIZE * BOARD_SIZE - 1) / 2;
 	public static final COLOUR[] AVAILABLE_COLOURS = COLOUR.values();
-	public static final int UNINITIALIZED = -1;
 
 	public COLOUR[] grid = new COLOUR[BOARD_SIZE * BOARD_SIZE];
 	private List<Move> possibleNextMoves = new ArrayList<Move>();
@@ -64,12 +65,7 @@ public class Board {
 		this.grid = grid.clone();
 	}
 
-	public List<COLOUR> makeSingleMove(int move) {
-		// if move is a single move, second int of Move.move will be UNINITIALIZED = -1
-		return makeDoubleMove(new int[] {move, UNINITIALIZED});
-	}
-
-	public List<COLOUR> makeDoubleMove(int[] move) {
+	public List<COLOUR> makeMove(int[] move) {
 		// search for calculated legal move and copy it's grid
 		// recalculate next moves
 		for (Move m : possibleNextMoves) {
@@ -121,6 +117,18 @@ public class Board {
 				line += (grid[x + y * BOARD_SIZE].getValue()) + "|";
 			}
 			board += line + System.lineSeparator();
+		}
+		return board;
+	}
+	
+	public String toCommunicationString() {
+		String board = "";
+		for (int i = 0; i < grid.length; i++) {
+			board += grid[i].getValue();
+			if (i==grid.length-1) {
+				continue;
+			}
+			board += Communications.DELIM;
 		}
 		return board;
 	}
@@ -186,7 +194,7 @@ public class Board {
 			}
 		}
 
-		while (boardHasNeighbours()) {
+		if (boardHasNeighbours()) {
 			generateBoard();
 		}
 	}
@@ -472,12 +480,12 @@ public class Board {
 		System.out.println(b.boardHasNeighbours());
 		System.out.println(b.countColours());
 		System.out.println(b.getPossibleMoves().get(0).move[0]);
-		if (b.makeSingleMove(3) != null) {
+		if (b.makeMove(new int[] {3}) != null) {
 			System.out.println("Cool");
 		}
 		System.out.println(b.toString());
 		System.out.println(b.getPossibleMoves().get(0).move[0]);
-		if (b.makeSingleMove(14) != null) {
+		if (b.makeMove(new int[] {14}) != null) {
 			System.out.println("Cool");
 		}
 		System.out.println(b.toString());

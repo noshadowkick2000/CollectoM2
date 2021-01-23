@@ -1,32 +1,21 @@
 package game;
 
-public class Collecto {
+import java.util.List;
+
+public abstract class Collecto {
 	
-	Board board;
-	Player[] players = new Player[2];
-	
-	public Collecto()
-	{
-		this.board = new Board();
+	public enum Condition {
+		VICTORY_PLAYER_ONE,
+		VICTORY_PLAYER_TWO,
+		DISCONNECT,
+		DRAW
 	}
 	
-	public void startGame()
-	{
-		
-	}
+	protected Board board;
 	
-	public void run()
-	{
-		
-	}
+	abstract public void startGame();
 	
-	public void endGame()
-	{
-		
-	}
+	abstract public List<COLOUR> makeMove(int[] move);
 	
-	public void getWinner()
-	{
-		
-	}
+	abstract public void endGame(Condition endGameCondition);
 }
