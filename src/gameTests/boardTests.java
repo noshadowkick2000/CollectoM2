@@ -17,7 +17,8 @@ class boardTests {
 	private static final String CORRECT_GRID_EXAMPLE_STRING = "5~3~4~2~5~3~6~4~6~3~4~3~1~2~5~3~2~1~2~6~5~4~1~4~0~4~1~4~5~6~2~1~5~6~2~3~1~5~4~6~5~3~6~3~6~2~1~2~1";
 	private static final int[] CORRECT_GRID_EXAMPLE_LEGAL_MOVES = new int[] {3, 10, 17, 24};
 	private static final int[] CORRECT_GRID_EXAMPLE_MOVE_THREE = new int[] {5, 3, 4, 2, 5, 3, 6, 4, 6, 3, 4, 3, 1, 2, 5, 3, 2, 1, 2, 6, 5, 4, 1, 0, 0, 1, 4, 0, 5, 6, 2, 1, 5, 6, 2, 3, 1, 5, 4, 6, 5, 3, 6, 3, 6, 2, 1, 2, 1};
-	private static final int[] ENDGAME_EXAMPLE = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 4, 3, 0, 0, 5, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 5, 6, 1, 0, 6};
+	private static final int[] ENDGAME_EXAMPLE = new int[] {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 5, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0};
+	private static final int[] DOUBLE_MOVE_BOARD = new int[] {6, 3, 5, 3, 4, 3, 1, 5, 2, 4, 5, 2, 1, 2, 2, 4, 6, 4, 6, 3, 5, 1, 2, 5, 0, 3, 1, 2, 4, 6, 1, 6, 2, 5, 6, 6, 1, 5, 3, 1, 4, 1, 5, 3, 4, 6, 3, 2, 4};
 	
 	@Test
 	void passedArgumentGenerationTest()
@@ -88,6 +89,14 @@ class boardTests {
 		assertEquals(2, wonBalls.size());
 		assertEquals(COLOUR.ORANGE, wonBalls.get(0));
 		assertEquals(COLOUR.ORANGE, wonBalls.get(1));
+	}
+	
+	@Test
+	void doubleMoveTest() {
+		board = new Board(DOUBLE_MOVE_BOARD);
+		List<COLOUR> wonBalls = board.makeMove(new int[] {17, 6});
+		int counter = 0;
+		assertNotNull(wonBalls);
 	}
 	
 	@Test

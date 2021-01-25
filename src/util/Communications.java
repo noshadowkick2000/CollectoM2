@@ -8,9 +8,9 @@ public class Communications {
 	public static final String NG = "NEWGAME";
 	
 	public static final String GO = "GAMEOVER";
-	public static final String GO_DRAW = "GAMEOVER~DRAW";
-	public static final String GO_V = "GAMEOVER~VICTORY";
-	public static final String GO_DISCONNECT = "GAMEOVER~DISCONNECT";
+	public static final String DRAW = "DRAW";
+	public static final String VICTORY = "VICTORY";
+	public static final String DISCONNECT = "DISCONNECT";
 	
 	public static final String LS = "LIST";
 	public static final String Q = "QUEUE";
@@ -18,5 +18,5 @@ public class Communications {
 	
 	public static final String DELIM = "~";
 	
-	public static final String E = "ERROR";
+	public static final String ERR = "ERROR";
 }

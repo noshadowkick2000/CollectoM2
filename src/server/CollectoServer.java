@@ -12,6 +12,8 @@ import util.Communications;
 public class CollectoServer {
 
 	private static final String USAGE = "run this server with arguments: [portnumber][description]";
+	private static final String CONSOLE_INDICATOR = "> ";
+	
 	private List<CollectoClientHandler> connectedClients = new ArrayList<CollectoClientHandler>();
 	private List<CollectoClientHandler> queuedClients = new ArrayList<CollectoClientHandler>();
 	
@@ -85,7 +87,7 @@ public class CollectoServer {
 	}
 	
 	public static void showMessage(String msg) {
-		System.out.println(msg);
+		System.out.println(CONSOLE_INDICATOR + msg);
 	}
 	
 	// Private methods ---------------------------------------------------------------------------------------------
@@ -121,7 +123,7 @@ public class CollectoServer {
 		int port = Integer.parseInt(args[0]);
 		String description = "";
 		for (int i = 1; i < args.length; i++) {
-			description += args[i];
+			description += args[i] + " ";
 		}
 		(new CollectoServer()).setupServer(port, description);
 	}

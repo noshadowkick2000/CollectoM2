@@ -48,6 +48,7 @@ public class CollectoServerGame extends Collecto {
 			}
 		} catch (IOException e) {
 			disconnectClient(player);
+		} catch (IndexOutOfBoundsException e) {
 		}
 	}
 
@@ -73,10 +74,6 @@ public class CollectoServerGame extends Collecto {
 		CollectoServer.showMessage("Game " + gameId + ": " + msg);
 	}
 
-	// Override methods
-	// --------------------------------------------------------------------------------------------
-
-	@Override
 	synchronized public void startGame() {
 
 		CollectoClientHandler playerOne = playingClients.get(0);
@@ -88,32 +85,35 @@ public class CollectoServerGame extends Collecto {
 		currentPlayer = 0;
 	}
 
-	@Override
-	public List<COLOUR> makeMove(int[] move) {
-		return board.makeMove(move);
-	}
-
-	@Override
 	synchronized public void endGame(Condition condition) {
 
 		if (condition.equals(Condition.DISCONNECT)) {
-			playingClients.get(0)
-					.endGame(Communications.GO_DISCONNECT + Communications.DELIM + playingClients.get(0).getName());
+			try {
+				playingClients.get(0).endGame(Communications.GO + Communications.DELIM + Communications.DISCONNECT
+						+ Communications.DELIM + playingClients.get(0).getName());
+			} catch (IndexOutOfBoundsException e) {
+				showMessage("both clients disconnected");
+			}
 		} else {
 			CollectoClientHandler playerOne = playingClients.get(0);
 			CollectoClientHandler playerTwo = playingClients.get(1);
 
 			switch (condition) {
 			case VICTORY_PLAYER_ONE:
-				playerOne.endGame(Communications.GO_V + Communications.DELIM + playerOne.getName());
-				playerTwo.endGame(Communications.GO_V + Communications.DELIM + playerOne.getName());
+				playerOne.endGame(
+						Communications.GO + Communications.DELIM + Communications.VICTORY + Communications.DELIM + playerOne.getName());
+				playerTwo.endGame(
+						Communications.GO + Communications.DELIM + Communications.VICTORY + Communications.DELIM + playerOne.getName());
 				break;
 			case VICTORY_PLAYER_TWO:
-				playerOne.endGame(Communications.GO_V + Communications.DELIM + playerTwo.getName());
-				playerTwo.endGame(Communications.GO_V + Communications.DELIM + playerTwo.getName());
+				playerOne.endGame(
+						Communications.GO + Communications.DELIM + Communications.VICTORY + Communications.DELIM + playerTwo.getName());
+				playerTwo.endGame(
+						Communications.GO + Communications.DELIM + Communications.VICTORY + Communications.DELIM + playerTwo.getName());
 				break;
 			case DRAW:
-				playerOne.endGame(Communications.GO_DRAW);
+				playerOne.endGame(Communications.GO + Communications.DELIM + Communications.DRAW);
+				playerTwo.endGame(Communications.GO + Communications.DELIM + Communications.DRAW);
 				break;
 			default:
 				break;
@@ -123,6 +123,8 @@ public class CollectoServerGame extends Collecto {
 
 		playingClients.clear();
 		currentPlayer = -1;
+		
+		showMessage("game ended");
 	}
 
 	public void getWinner() {
@@ -132,14 +134,14 @@ public class CollectoServerGame extends Collecto {
 
 		if (playerOnePoints == playerTwoPoints) {
 			endGame(Condition.DRAW);
-			showMessage("Draw with each " + playerOnePoints + "points");
+			showMessage("Draw with each " + playerOnePoints + " points");
 			return;
 		} else if (playerOnePoints > playerTwoPoints) {
 			endGame(Condition.VICTORY_PLAYER_ONE);
-			showMessage("Player one won with " + playerOnePoints + "points");
+			showMessage("Player one won with " + playerOnePoints + " points");
 			return;
 		} else {
-			showMessage("Player two won with " + playerTwoPoints + "points");
+			showMessage("Player two won with " + playerTwoPoints + " points");
 			endGame(Condition.VICTORY_PLAYER_TWO);
 		}
 	}

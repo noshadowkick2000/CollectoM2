@@ -2,7 +2,7 @@ package game;
 
 import java.util.List;
 
-public abstract class Collecto {
+public class Collecto {
 	
 	public enum Condition {
 		VICTORY_PLAYER_ONE,
@@ -11,11 +11,9 @@ public abstract class Collecto {
 		DRAW
 	}
 	
-	protected Board board;
+	public Board board;
 	
-	abstract public void startGame();
-	
-	abstract public List<COLOUR> makeMove(int[] move);
-	
-	abstract public void endGame(Condition endGameCondition);
+	public List<COLOUR> makeMove(int[] move) {
+		return board.makeMove(move);
+	}
 }

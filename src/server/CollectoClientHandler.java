@@ -49,6 +49,7 @@ public class CollectoClientHandler extends Player implements Runnable {
 		try {
 			this.game = game;
 			state = State.IN_GAME;
+			balls.clear();
 			writeMessage(Communications.NG + Communications.DELIM + board + Communications.DELIM + p1
 					+ Communications.DELIM + p2);
 		} catch (IOException e) {
@@ -69,7 +70,7 @@ public class CollectoClientHandler extends Player implements Runnable {
 	}
 	
 	public void showError(String description) throws IOException {
-		writeMessage(Communications.E + Communications.DELIM + description);
+		writeMessage(Communications.ERR + Communications.DELIM + description);
 	}
 
 	// is only called after initialization (is a precondition)
