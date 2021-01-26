@@ -2,8 +2,6 @@ package game;
 
 import java.util.Random;
 
-import game.Board.Move;
-
 public class EasyStrategy implements CollectoStrategy {
 
 	@Override

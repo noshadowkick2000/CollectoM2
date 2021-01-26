@@ -1,8 +1,8 @@
 package client;
 
 import java.io.IOException;
-import java.util.Scanner;
 
+import util.CollectoInterface;
 import util.Communications;
 
 public abstract class CollectoClientPlayer implements Runnable {
@@ -17,15 +17,13 @@ public abstract class CollectoClientPlayer implements Runnable {
 	static private final String[] LOBBY_COMMANDS = new String[] { Communications.Q, Communications.LS, HELP, EX };
 
 	protected CollectoClient client;
-	protected Scanner scanner;
 	protected Thread lobbyThread;
 
 	protected boolean gameAvailable = false;
 	protected boolean inQueue = false;
 
-	public CollectoClientPlayer(CollectoClient client, Scanner scanner) {
+	public CollectoClientPlayer(CollectoClient client) {
 		this.client = client;
-		this.scanner = scanner;
 	}
 
 	public void run() {
@@ -43,7 +41,7 @@ public abstract class CollectoClientPlayer implements Runnable {
 			for (int i = 1; i < args.length; i++) {
 				connectedClients += args[i] + System.lineSeparator();
 			}
-			CollectoClient.showMessage("Currently " + (args.length - 1) + " clients connected to server:"
+			CollectoInterface.showMessage("Currently " + (args.length - 1) + " clients connected to server:"
 					+ System.lineSeparator() + connectedClients);
 			break;
 		case Communications.NG:
@@ -67,19 +65,19 @@ public abstract class CollectoClientPlayer implements Runnable {
 				startLobby();
 				break;
 			case Communications.DRAW:
-				CollectoClient.showMessage("Game is a draw");
+				CollectoInterface.showMessage("Game is a draw");
 				client.cleanUpGame();
 				startLobby();
 				break;
 			case Communications.DISCONNECT:
-				CollectoClient.showMessage("You won, other player disconnected");
+				CollectoInterface.showMessage("You won, other player disconnected");
 				client.cleanUpGame();
 				startLobby();
 				break;
 			}
 			break;
 		case Communications.ERR:
-			CollectoClient.showMessage("You made an illegal move, try again");
+			CollectoInterface.showMessage("You made an illegal move, try again");
 			break;
 		}
 	}
@@ -90,7 +88,7 @@ public abstract class CollectoClientPlayer implements Runnable {
 	}
 
 	public void endGame() {
-		CollectoClient.showMessage(GAME_OVER);
+		CollectoInterface.showMessage(GAME_OVER);
 		gameAvailable = false;
 	}
 
@@ -109,14 +107,14 @@ public abstract class CollectoClientPlayer implements Runnable {
 
 	private void lobbyTUI() {
 		try {
-			CollectoClient.showMessage(LOBBY_USAGE);
-			String lastInput; // = CollectoClient.requestOption(LOBBY_COMMANDS, scanner);
+			CollectoInterface.showMessage(LOBBY_USAGE);
+			String lastInput;
 
 			// lobby loop
 			while (true) {
-				lastInput = CollectoClient.requestOption(LOBBY_COMMANDS, scanner);
+				lastInput = CollectoInterface.requestOption(LOBBY_COMMANDS);
 				if (gameAvailable) {
-					CollectoClient.showMessage(GAME_SEPERATOR);
+					CollectoInterface.showMessage(GAME_SEPERATOR);
 					client.showBoard();
 					return;
 				}
@@ -128,17 +126,17 @@ public abstract class CollectoClientPlayer implements Runnable {
 					requestPlayerList();
 					break;
 				case HELP:
-					CollectoClient.showMessage(LOBBY_USAGE);
+					CollectoInterface.showMessage(LOBBY_USAGE);
 					break;
 				case EX:
-					CollectoClient.showMessage("Shutting down");
+					CollectoInterface.showMessage("Shutting down");
 					System.exit(0);
 				default:
 					break;
 				}
 			}
 		} catch (IOException e) {
-			CollectoClient.showMessage("Connection to server lost");
+			CollectoInterface.showMessage("Connection to server lost");
 		}
 	}
 
@@ -149,6 +147,6 @@ public abstract class CollectoClientPlayer implements Runnable {
 	protected void switchQueue() throws IOException {
 		client.writeMessage(Communications.Q);
 		inQueue = !inQueue;
-		CollectoClient.showMessage("Currently in queue: " + inQueue);
+		CollectoInterface.showMessage("Currently in queue: " + inQueue);
 	}
 }

@@ -6,6 +6,7 @@ import java.util.List;
 
 import game.Board;
 import game.Collecto;
+import util.CollectoInterface;
 import util.Communications;
 
 public class CollectoServerGame extends Collecto {
@@ -63,7 +64,7 @@ public class CollectoServerGame extends Collecto {
 	}
 
 	private void showMessage(String msg) {
-		CollectoServer.showMessage("Game " + gameId + ": " + msg);
+		CollectoInterface.showMessage("Game " + gameId + ": " + msg);
 	}
 
 	synchronized public void startGame() {

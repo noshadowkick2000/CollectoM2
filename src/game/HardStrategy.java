@@ -2,8 +2,8 @@ package game;
 
 import java.util.List;
 
-import client.CollectoClient;
 import game.Board.Move;
+import util.CollectoInterface;
 
 public class HardStrategy implements CollectoStrategy {
 
@@ -19,7 +19,7 @@ public class HardStrategy implements CollectoStrategy {
 		List<Move> nextMoves = board.getPossibleMoves();
 		int[] scores = new int[nextMoves.size()];
 		crunchNodes(false, nextMoves, scores, board, depth, thisIsFirstPlayer);
-		CollectoClient.showMessage(getHighestScore(scores, false) + "");
+		CollectoInterface.showMessage(getHighestScore(scores, false) + "");
 		return nextMoves.get(getHighestScore(scores, true)).move;
 	}
 

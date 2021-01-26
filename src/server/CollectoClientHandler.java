@@ -6,17 +6,18 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+
+import util.CollectoInterface;
+import util.CollectoNetworker;
 import util.Communications;
 
-public class CollectoClientHandler implements Runnable {
+public class CollectoClientHandler extends CollectoNetworker implements Runnable {
 
 	private enum State {
 		UNINITIALIZED, NO_USERNAME, INITIALIZED, IN_GAME
 	}
 
-	//private Socket sock;
-	private BufferedReader in;
-	private BufferedWriter out;
+	// private Socket sock;
 	private CollectoServer server;
 	private CollectoServerGame game;
 	private String description;
@@ -28,7 +29,7 @@ public class CollectoClientHandler implements Runnable {
 	// ------------------------------------------------------------------------------------------
 
 	public CollectoClientHandler(Socket sock, CollectoServer server, String description) throws IOException {
-		//this.sock = sock;
+		// this.sock = sock;
 		in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 		out = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
 		this.server = server;
@@ -66,7 +67,7 @@ public class CollectoClientHandler implements Runnable {
 			disconnect();
 		}
 	}
-	
+
 	public void showError(String description) throws IOException {
 		writeMessage(Communications.ERR + Communications.DELIM + description);
 	}
@@ -105,7 +106,7 @@ public class CollectoClientHandler implements Runnable {
 			disconnect();
 		}
 	}
-	
+
 	private void parseCommand(String input) throws IOException {
 		String[] commands = input.split(Communications.DELIM);
 
@@ -171,17 +172,11 @@ public class CollectoClientHandler implements Runnable {
 		writeMessage(list);
 	}
 
-	private void writeMessage(String msg) throws IOException {
-		out.write(msg);
-		out.newLine();
-		out.flush();
-	}
-	
 	private void showMessage(String msg) {
 		String represenation = this.toString();
 		if (!name.equals("")) {
 			represenation = name;
 		}
-		CollectoServer.showMessage("Client " + represenation + ": " + msg);
+		CollectoInterface.showMessage("Client " + represenation + ": " + msg);
 	}
 }

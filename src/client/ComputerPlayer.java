@@ -1,15 +1,14 @@
 package client;
 
-import java.util.Scanner;
-
 import game.CollectoStrategy;
+import util.CollectoInterface;
 
 public class ComputerPlayer extends CollectoClientPlayer {
 	
 	private CollectoStrategy strategy;
 	
-	public ComputerPlayer(CollectoClient client, Scanner scanner, CollectoStrategy strategy) {
-		super(client, scanner);
+	public ComputerPlayer(CollectoClient client, CollectoStrategy strategy) {
+		super(client);
 		this.strategy = strategy;
 	}
 
@@ -19,9 +18,9 @@ public class ComputerPlayer extends CollectoClientPlayer {
 		try {
 			lobbyThread.join();
 		} catch (InterruptedException e) {
-			CollectoClient.showMessage("Error joining main thread");
+			CollectoInterface.showMessage("Error joining main thread");
 		}
 		
-		return strategy.getMove(client.board);
+		return strategy.getMove(client.game.board);
 	}
 }

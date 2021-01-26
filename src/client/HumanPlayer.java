@@ -1,14 +1,14 @@
 package client;
 
-import java.util.Scanner;
+import util.CollectoInterface;
 
 public class HumanPlayer extends CollectoClientPlayer {
 
 	static private final String MOVE_FORMAT = "Select move to play, format is <firstMove>[second move]";
 	static private final String YOUR_MOVE = "It's your move";
 
-	public HumanPlayer(CollectoClient client, Scanner scanner) {
-		super(client, scanner);
+	public HumanPlayer(CollectoClient client) {
+		super(client);
 	}
 
 	@Override
@@ -17,23 +17,23 @@ public class HumanPlayer extends CollectoClientPlayer {
 		try {
 			lobbyThread.join();
 		} catch (InterruptedException e) {
-			CollectoClient.showMessage("Error joining main thread");
+			CollectoInterface.showMessage("Error joining main thread");
 		}
 
 		// TODO empty scanner in case player was typing something outside their turn
 
 		client.showBoard();
 
-		CollectoClient.showMessage(YOUR_MOVE);
+		CollectoInterface.showMessage(YOUR_MOVE);
 
 		String[] args;
 		int[] move;
 
 		while (true) {
-			args = CollectoClient.requestInput(MOVE_FORMAT, scanner).split(" ");
+			args = CollectoInterface.requestInput(MOVE_FORMAT).split(" ");
 
 			if (args[0].equals("hint")) {
-				client.showPossibleMoves();
+				CollectoInterface.showPossibleMoves(client.game.board);
 				continue;
 			}
 
@@ -43,13 +43,13 @@ public class HumanPlayer extends CollectoClientPlayer {
 					move[i] = Integer.parseInt(args[i]);
 				}
 			} catch (NumberFormatException e) {
-				CollectoClient.showMessage("Move format was incorrect");
+				CollectoInterface.showMessage("Move format was incorrect");
 			}
 
-			if (client.board.isValidMove(move)) {
+			if (client.game.board.isValidMove(move)) {
 				break;
 			} else {
-				CollectoClient.showMessage("Move was not valid, try again");
+				CollectoInterface.showMessage("Move was not valid, try again");
 			}
 		}
 		return move;
