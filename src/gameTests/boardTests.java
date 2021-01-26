@@ -2,8 +2,6 @@ package gameTests;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.List;
-
 import org.junit.jupiter.api.Test;
 
 import game.Board;
@@ -44,9 +42,8 @@ class boardTests {
 	{
 		board = new Board(CORRECT_GRID_EXAMPLE);
 		Board copiedBoard = board.deepCopy();
-		copiedBoard.manuallyCalculateMoves();
-		assertNotNull(copiedBoard.makeMove(copiedBoard.getPossibleMoves().get(0).move));
-		assertNotEquals(board.grid, copiedBoard.grid);;
+		copiedBoard.makeMove(copiedBoard.getPossibleMoves().get(0).move);
+		assertNotEquals(board.grid, copiedBoard.grid);
 	}
 
 	@Test
@@ -79,33 +76,31 @@ class boardTests {
 	void moveTest()
 	{
 		board = new Board(CORRECT_GRID_EXAMPLE);
-		List<COLOUR> wonBalls = board.makeMove(new int[] {3});
+		board.makeMove(new int[] {3});
 		int counter = 0;
 		for (COLOUR c : board.grid)
 		{
 			assertEquals(c.getValue(), CORRECT_GRID_EXAMPLE_MOVE_THREE[counter]);
 			counter++;
 		}
-		assertEquals(2, wonBalls.size());
-		assertEquals(COLOUR.ORANGE, wonBalls.get(0));
-		assertEquals(COLOUR.ORANGE, wonBalls.get(1));
+		assertEquals(2, board.p1Balls.size());
+		assertEquals(COLOUR.CYAN, board.p1Balls.get(0));
+		assertEquals(COLOUR.CYAN, board.p1Balls.get(1));
 	}
 	
 	@Test
 	void doubleMoveTest() {
 		board = new Board(DOUBLE_MOVE_BOARD);
-		List<COLOUR> wonBalls = board.makeMove(new int[] {17, 6});
-		int counter = 0;
-		assertNotNull(wonBalls);
+		board.makeMove(new int[] {17, 6});
+		assertNotEquals(0, board.p1Balls.size());
 	}
 	
 	@Test
 	void illegalMoveTest()
 	{
 		board = new Board(ENDGAME_EXAMPLE);
-		List<COLOUR> wonBalls = board.makeMove(new int[] {0});
-
-		assertNull(wonBalls);
+		board.makeMove(new int[] {0});
+		assertEquals(0, board.p1Balls.size());
 	}
 	
 	@Test

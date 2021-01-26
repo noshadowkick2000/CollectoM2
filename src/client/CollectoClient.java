@@ -14,6 +14,7 @@ import game.Board.Move;
 import game.Collecto;
 import game.EasyStrategy;
 import game.HardStrategy;
+import game.MediumStrategy;
 import util.Communications;
 
 public class CollectoClient extends Collecto {
@@ -22,8 +23,10 @@ public class CollectoClient extends Collecto {
 	private static final String SHOW_MOVES = "Possible moves are: ";
 	private static final String CHOOSE_HUMAN = "HUMAN";
 	private static final String CHOOSE_AI_EASY = "AI EASY";
+	private static final String CHOOSE_AI_MEDIUM = "AI MEDIUM";
 	private static final String CHOOSE_AI_HARD = "AI HARD";
-	private static final String[] PLAYER_OPTIONS = new String[] { CHOOSE_HUMAN, CHOOSE_AI_EASY, CHOOSE_AI_HARD };
+	private static final String[] PLAYER_OPTIONS = new String[] { CHOOSE_HUMAN, CHOOSE_AI_EASY, CHOOSE_AI_MEDIUM,
+			CHOOSE_AI_HARD };
 
 	private static final String CONSOLE_INDICATOR = "> ";
 	private static final String INPUT_INDICATOR = ": ";
@@ -33,15 +36,27 @@ public class CollectoClient extends Collecto {
 	private BufferedWriter out;
 
 	private CollectoClientPlayer localPlayer;
-	// TODO decide whether want to implement min max or just greedy
-	// private Player serverPlayer;
 	private boolean localPlayerTurn = false;
 
 	private String loginName;
 
+	public void connectServer(String[] args) throws IOException {
+		// get arguments
+		InetAddress hostAdress = InetAddress.getByName(args[0]);
+		int port = Integer.parseInt(args[1]);
+
+		// create and assign socket and in and out
+		Socket sock = new Socket(hostAdress, port);
+		in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+		out = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
+
+		handleInitialization();
+
+		sock.close();
+	}
+
 	public void setupGame(int[] board, String secondPlayer) throws IOException {
 		this.board = new Board(board);
-		// serverPlayer = new Player();
 
 		localPlayer.startGame();
 
@@ -70,33 +85,39 @@ public class CollectoClient extends Collecto {
 
 	public void requestMove(int[] move) throws IOException {
 		if (localPlayerTurn) {
-			localPlayer.giveBalls(makeMove(move));
+			board.makeMove(move);
 		} else {
-			// serverPlayer.giveBalls(makeMove(move));
-			makeMove(move);
+			board.makeMove(move);
+			if (board.noMovesLeft()) {
+				return;
+			}
 			localPlayer.sendServerMove(localPlayer.getMove());
 		}
 		localPlayerTurn = !localPlayerTurn;
 	}
 
-	public void connectServer(String[] args) throws IOException {
-		// get arguments
-		InetAddress hostAdress = InetAddress.getByName(args[0]);
-		int port = Integer.parseInt(args[1]);
-
-		// create and assign socket and in and out
-		Socket sock = new Socket(hostAdress, port);
-		in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
-		out = new BufferedWriter(new OutputStreamWriter(sock.getOutputStream()));
-
-		handleInitialization();
-
-		sock.close();
-	}
-
 	public void handleInitialization() {
 		Scanner scanner = new Scanner(System.in);
 
+		setClientPlayer(scanner);
+
+		try {
+
+			setClientLogin(scanner);
+
+			localPlayer.startLobby();
+			while (true) {
+				localPlayer.parseServerInput();
+			}
+
+		} catch (IOException e) {
+			showMessage("Connection error: server disconnected");
+		} catch (InvalidResponseException e) {
+			showMessage("Error: unexpected response from server");
+		}
+	}
+
+	private void setClientPlayer(Scanner scanner) {
 		boolean modeChosen = false;
 
 		while (!modeChosen) {
@@ -115,58 +136,52 @@ public class CollectoClient extends Collecto {
 				localPlayer = new ComputerPlayer(this, scanner, new EasyStrategy());
 				modeChosen = true;
 				break;
+			case CHOOSE_AI_MEDIUM:
+				localPlayer = new ComputerPlayer(this, scanner, new MediumStrategy());
+				modeChosen = true;
+				break;
 			case CHOOSE_AI_HARD:
 				localPlayer = new ComputerPlayer(this, scanner, new HardStrategy());
 				modeChosen = true;
 				break;
 			}
 		}
+	}
 
-		try {
-			// hello server
-			writeMessage(Communications.H + Communications.DELIM + requestInput("Enter client description", scanner));
-			showMessage("Sent Hello");
+	private void setClientLogin(Scanner scanner) throws IOException, InvalidResponseException {
+		// hello server
+		writeMessage(Communications.H + Communications.DELIM + requestInput("Enter client description", scanner));
+		showMessage("Sent Hello");
 
-			String[] serverHello = awaitMessage().split(Communications.DELIM);
+		String[] serverHello = awaitMessage().split(Communications.DELIM);
 
-			// server responds hello
-			if (!serverHello[0].equals(Communications.H)) {
+		// server responds hello
+		if (!serverHello[0].equals(Communications.H)) {
+			throw new InvalidResponseException();
+		}
+		showMessage("Hello aknowledged");
+
+		// attempt login server
+		boolean loggedIn = false;
+		while (!loggedIn) {
+			writeMessage(
+					Communications.L + Communications.DELIM + (loginName = requestInput("Enter login name", scanner)));
+
+			switch (awaitMessage()) {
+			case Communications.L:
+				loggedIn = true;
+				break;
+			case Communications.AL:
+				showMessage("Login already taken, try another name");
+				break;
+			default:
 				throw new InvalidResponseException();
 			}
-			showMessage("Hello aknowledged");
-
-			// attempt login server
-			boolean loggedIn = false;
-			while (!loggedIn) {
-				writeMessage(Communications.L + Communications.DELIM
-						+ (loginName = requestInput("Enter login name", scanner)));
-
-				switch (awaitMessage()) {
-				case Communications.L:
-					loggedIn = true;
-					break;
-				case Communications.AL:
-					showMessage("Login already taken, try another name");
-					break;
-				default:
-					throw new InvalidResponseException();
-				}
-			}
-			if (serverHello.length == 2) {
-				showMessage("Logged onto server with description: " + serverHello[1]);
-			} else {
-				showMessage("Logged onto server without description");
-			}
-
-			localPlayer.startLobby();
-			while (true) {
-				localPlayer.parseServerInput();
-			}
-
-		} catch (IOException e) {
-			showMessage("Connection error: server disconnected");
-		} catch (InvalidResponseException e) {
-			showMessage("Error: unexpected response from server");
+		}
+		if (serverHello.length == 2) {
+			showMessage("Logged onto server with description: " + serverHello[1]);
+		} else {
+			showMessage("Logged onto server without description");
 		}
 	}
 

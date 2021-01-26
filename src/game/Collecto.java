@@ -1,7 +1,5 @@
 package game;
 
-import java.util.List;
-
 public class Collecto {
 	
 	public enum Condition {
@@ -12,8 +10,4 @@ public class Collecto {
 	}
 	
 	public Board board;
-	
-	public List<COLOUR> makeMove(int[] move) {
-		return board.makeMove(move);
-	}
 }

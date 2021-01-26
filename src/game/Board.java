@@ -40,9 +40,26 @@ public class Board {
 	public static final int BOARD_SIZE = 7;
 	public static final int CENTER = (BOARD_SIZE * BOARD_SIZE - 1) / 2;
 	public static final COLOUR[] AVAILABLE_COLOURS = COLOUR.values();
+	public static final String BALL_STRING = String.valueOf((char) 250);
+
+	public static final String BOARD_PADDING_LEFT = "%-6s|";
+	public static final String BOARD_PADDING_RIGHT = "%6s";
+	public static final String BOARD_SEPERATOR = "------------------------------------------";
+	public static final String BOARD_ROW = "      -----------------------------";
+	public static final String BOARD_TOP = "        21  22  23  24  25  26  27" + System.lineSeparator()
+			+ "        |   |   |   |   |   |   |" + System.lineSeparator() + "        v   v   v   v   v   v   v"
+			+ System.lineSeparator();
+	public static final String BOARD_BOTTOM = "        ^   ^   ^   ^   ^   ^   ^" + System.lineSeparator()
+			+ "        |   |   |   |   |   |   |" + System.lineSeparator() + "        14  15  16  17  18  19  20"
+			+ System.lineSeparator();
 
 	public COLOUR[] grid = new COLOUR[BOARD_SIZE * BOARD_SIZE];
 	private List<Move> possibleNextMoves = new ArrayList<Move>();
+
+	public List<COLOUR> p1Balls = new ArrayList<COLOUR>();
+	public List<COLOUR> p2Balls = new ArrayList<COLOUR>();
+	public boolean firstPlayerTurn = true;
+	public static int BALLS_PER_POINT = 3;
 
 	// Public methods and constructors
 	// ----------------------------------------------------------------
@@ -72,24 +89,37 @@ public class Board {
 	// constructor so deepCopy() is facilitated
 	// does not calculate the next moves since it is a copy of the board currently
 	// calculating the moves
-	public Board(COLOUR[] grid) {
+	public Board(COLOUR[] grid, List<Move> nextMoves, List<COLOUR> p1Balls, List<COLOUR> p2Balls,
+			boolean firstPlayerTurn) {
 		this.grid = grid.clone();
+		this.possibleNextMoves.addAll(nextMoves);
+		this.p1Balls.addAll(p1Balls);
+		this.p2Balls.addAll(p2Balls);
+		this.firstPlayerTurn = firstPlayerTurn;
 	}
 
-	public List<COLOUR> makeMove(int[] move) {
+	// before makeMove always call isValidMove
+	// Board needs to store the balls in order to efficiently implement min max
+	public void makeMove(int[] move) {
 		// search for calculated legal move and copy it's grid
 		// recalculate next moves
 		Move m = findMove(move);
-		
+
 		// if move was not in calculated moves, it could not have been legal
 		if (m == null) {
-			return null;
+			return;
 		}
-		
+
 		grid = m.board.grid;
-		List<COLOUR> wonBalls = m.gainedBalls;
+		if (firstPlayerTurn) {
+			p1Balls.addAll(m.gainedBalls);
+		} else {
+			p2Balls.addAll(m.gainedBalls);
+		}
+
+		firstPlayerTurn = !firstPlayerTurn;
+
 		calculateNextPossibleMoves();
-		return wonBalls;
 	}
 
 	public boolean isValidMove(int[] move) {
@@ -123,18 +153,20 @@ public class Board {
 	}
 
 	public Board deepCopy() {
-		return new Board(grid);
+		return new Board(grid, possibleNextMoves, p1Balls, p2Balls, firstPlayerTurn);
 	}
 
 	public String toString() {
-		String board = "";
+		String board = BOARD_SEPERATOR + System.lineSeparator() + BOARD_TOP;
 		for (int y = 0; y < BOARD_SIZE; y++) {
-			String line = "|";
+			String line = String.format(BOARD_PADDING_LEFT, (y + BOARD_SIZE) + "-->");
 			for (int x = 0; x < BOARD_SIZE; x++) {
-				line += (grid[x + y * BOARD_SIZE].getValue()) + "|";
+				line += " " + (grid[x + y * BOARD_SIZE].getValue()) + " |";
 			}
-			board += line + System.lineSeparator();
+			board += line + String.format(BOARD_PADDING_RIGHT, "<--" + (y)) + System.lineSeparator();
+			board += BOARD_ROW + System.lineSeparator();
 		}
+		board += BOARD_BOTTOM + System.lineSeparator() + BOARD_SEPERATOR;
 		return board;
 	}
 
@@ -150,9 +182,21 @@ public class Board {
 		return board;
 	}
 
-	// used for min max and deeper calculations
-	public void manuallyCalculateMoves() {
-		calculateNextPossibleMoves();
+	public int countPoints(boolean playerOne) {
+		List<COLOUR> balls = playerOne ? p1Balls : p2Balls;
+
+		int[] ballCounter = new int[COLOUR.values().length];
+		for (int i = 0; i < balls.size(); i++) {
+			ballCounter[balls.get(i).getValue()]++;
+		}
+
+		int totalPoints = 0;
+
+		for (int amount : ballCounter) {
+			int excess = amount % BALLS_PER_POINT;
+			totalPoints += (amount - excess) / BALLS_PER_POINT;
+		}
+		return totalPoints;
 	}
 
 	// Private methods
@@ -219,7 +263,7 @@ public class Board {
 			}
 		}
 
-		if (boardHasNeighbours()) {
+		if (boardHasNeighbours() || !grid[CENTER].equals(COLOUR.EMPTY)) {
 			generateBoard();
 		}
 	}
@@ -503,12 +547,14 @@ public class Board {
 		System.out.println(b.boardHasNeighbours());
 		System.out.println(b.countColours());
 		System.out.println(b.getPossibleMoves().get(0).move[0]);
-		if (b.makeMove(new int[] { 3 }) != null) {
+		if (b.isValidMove(new int[] { 3 })) {
+			b.makeMove(new int[] { 3 });
 			System.out.println("Cool");
 		}
 		System.out.println(b.toString());
 		System.out.println(b.getPossibleMoves().get(0).move[0]);
-		if (b.makeMove(new int[] { 14 }) != null) {
+		if (b.isValidMove(new int[] { 14 })) {
+			b.makeMove(new int[] { 14 });
 			System.out.println("Cool");
 		}
 		System.out.println(b.toString());

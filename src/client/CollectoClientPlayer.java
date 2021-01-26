@@ -3,10 +3,9 @@ package client;
 import java.io.IOException;
 import java.util.Scanner;
 
-import game.Player;
 import util.Communications;
 
-public abstract class CollectoClientPlayer extends Player implements Runnable {
+public abstract class CollectoClientPlayer implements Runnable {
 
 	private static final int boardLength = game.Board.BOARD_SIZE * game.Board.BOARD_SIZE;
 
@@ -87,7 +86,7 @@ public abstract class CollectoClientPlayer extends Player implements Runnable {
 
 	public void startGame() {
 		gameAvailable = true;
-		balls.clear();
+		inQueue = false;
 	}
 
 	public void endGame() {

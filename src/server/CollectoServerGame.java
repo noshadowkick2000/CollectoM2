@@ -5,14 +5,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 import game.Board;
-import game.COLOUR;
 import game.Collecto;
 import util.Communications;
 
 public class CollectoServerGame extends Collecto {
 
 	private List<CollectoClientHandler> playingClients = new ArrayList<CollectoClientHandler>();
-	private int currentPlayer = -1;
 
 	private int gameId;
 
@@ -27,11 +25,9 @@ public class CollectoServerGame extends Collecto {
 
 	synchronized public void requestMove(int[] move, CollectoClientHandler player) {
 		try {
-			if (playingClients.get(currentPlayer).equals(player)) {
-				List<COLOUR> wonBalls = makeMove(move);
-				if (wonBalls != null) {
-					switchPlayer();
-					player.giveBalls(wonBalls);
+			if (playingClients.get(board.firstPlayerTurn ? 0 : 1).equals(player)) {
+				if (board.isValidMove(move)) {
+					board.makeMove(move);
 					playingClients.get(0).sendMove(move);
 					playingClients.get(1).sendMove(move);
 					showMessage("Move " + moveToString(move) + "played by " + player.getName());
@@ -58,10 +54,6 @@ public class CollectoServerGame extends Collecto {
 		endGame(Condition.DISCONNECT);
 	}
 
-	private void switchPlayer() {
-		currentPlayer = (currentPlayer == 0) ? 1 : 0;
-	}
-
 	private String moveToString(int[] move) {
 		String returnString = "";
 		for (int m : move) {
@@ -81,8 +73,6 @@ public class CollectoServerGame extends Collecto {
 
 		playerOne.startGame(board.toCommunicationString(), playerOne.getName(), playerTwo.getName(), this);
 		playerTwo.startGame(board.toCommunicationString(), playerOne.getName(), playerTwo.getName(), this);
-
-		currentPlayer = 0;
 	}
 
 	synchronized public void endGame(Condition condition) {
@@ -122,15 +112,14 @@ public class CollectoServerGame extends Collecto {
 		}
 
 		playingClients.clear();
-		currentPlayer = -1;
 		
 		showMessage("game ended");
 	}
 
 	public void getWinner() {
 
-		int playerOnePoints = playingClients.get(0).countPoints();
-		int playerTwoPoints = playingClients.get(1).countPoints();
+		int playerOnePoints = board.countPoints(true);
+		int playerTwoPoints = board.countPoints(false);
 
 		if (playerOnePoints == playerTwoPoints) {
 			endGame(Condition.DRAW);

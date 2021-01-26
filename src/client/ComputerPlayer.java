@@ -15,19 +15,13 @@ public class ComputerPlayer extends CollectoClientPlayer {
 
 	@Override
 	public int[] getMove() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public void startGame() {
-		// TODO Auto-generated method stub
 		
-	}
-
-	@Override
-	public void endGame() {
-		// TODO Auto-generated method stub
+		try {
+			lobbyThread.join();
+		} catch (InterruptedException e) {
+			CollectoClient.showMessage("Error joining main thread");
+		}
 		
+		return strategy.getMove(client.board);
 	}
 }

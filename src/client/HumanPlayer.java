@@ -19,9 +19,13 @@ public class HumanPlayer extends CollectoClientPlayer {
 		} catch (InterruptedException e) {
 			CollectoClient.showMessage("Error joining main thread");
 		}
-		
+
+		// TODO empty scanner in case player was typing something outside their turn
+
+		client.showBoard();
+
 		CollectoClient.showMessage(YOUR_MOVE);
-		
+
 		String[] args;
 		int[] move;
 
@@ -41,7 +45,7 @@ public class HumanPlayer extends CollectoClientPlayer {
 			} catch (NumberFormatException e) {
 				CollectoClient.showMessage("Move format was incorrect");
 			}
-			
+
 			if (client.board.isValidMove(move)) {
 				break;
 			} else {

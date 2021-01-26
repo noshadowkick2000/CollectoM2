@@ -6,10 +6,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
-import game.Player;
 import util.Communications;
 
-public class CollectoClientHandler extends Player implements Runnable {
+public class CollectoClientHandler implements Runnable {
 
 	private enum State {
 		UNINITIALIZED, NO_USERNAME, INITIALIZED, IN_GAME
@@ -49,7 +48,6 @@ public class CollectoClientHandler extends Player implements Runnable {
 		try {
 			this.game = game;
 			state = State.IN_GAME;
-			balls.clear();
 			writeMessage(Communications.NG + Communications.DELIM + board + Communications.DELIM + p1
 					+ Communications.DELIM + p2);
 		} catch (IOException e) {
