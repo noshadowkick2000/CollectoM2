@@ -182,6 +182,36 @@ public class Board {
 		return board;
 	}
 
+	public static String moveIntToString(int[] move) {
+		String moveMessage = Communications.M;
+		for (int m : move) {
+			moveMessage += Communications.DELIM + m;
+		}
+		return moveMessage;
+	}
+	
+	public static String moveToReadableString(int[] move) {
+		String returnString = "";
+		for (int m : move) {
+			returnString += m + " ";
+		}
+		return returnString;
+	}
+
+	// for convenience, this string array includes the MOVE at the start of the
+	// protocol
+	public static int[] moveStringToInt(String[] move) {
+
+		if (move.length == 3) {
+			// make double move
+			return new int[] { Integer.parseInt(move[1]), Integer.parseInt(move[2]) };
+		} else if (move.length == 2) {
+			// make single move
+			return new int[] { Integer.parseInt(move[1]) };
+		}
+		return null;
+	}
+
 	public int countPoints(boolean playerOne) {
 		List<COLOUR> balls = playerOne ? p1Balls : p2Balls;
 
@@ -504,7 +534,7 @@ public class Board {
 				{
 					int index = x + BOARD_SIZE * i;
 					int neighbour = index - 1;
-					if (!hasIdenticalNeighbour(grid[index], neighbour)) {
+					if (!hasIdenticalNeighbour(grid[index], neighbour) || grid[index].equals(COLOUR.EMPTY)) {
 						continue;
 					}
 					connectedBallsIndex.add(index);
@@ -519,7 +549,7 @@ public class Board {
 			for (int y = 1; y < BOARD_SIZE; y++) {
 				int index = i + BOARD_SIZE * y;
 				int neighbour = index - BOARD_SIZE;
-				if (!hasIdenticalNeighbour(grid[index], neighbour)) {
+				if (!hasIdenticalNeighbour(grid[index], neighbour) || grid[index].equals(COLOUR.EMPTY)) {
 					continue;
 				}
 				connectedBallsIndex.add(index);
@@ -541,39 +571,26 @@ public class Board {
 	// DEBUG METHODS
 	// -----------------------------------------------------------------------------------
 
-	public static void main(String[] args) {
-		Board b = new Board();
-		System.out.println(b.toString());
-		System.out.println(b.boardHasNeighbours());
-		System.out.println(b.countColours());
-		System.out.println(b.getPossibleMoves().get(0).move[0]);
-		if (b.isValidMove(new int[] { 3 })) {
-			b.makeMove(new int[] { 3 });
-			System.out.println("Cool");
-		}
-		System.out.println(b.toString());
-		System.out.println(b.getPossibleMoves().get(0).move[0]);
-		if (b.isValidMove(new int[] { 14 })) {
-			b.makeMove(new int[] { 14 });
-			System.out.println("Cool");
-		}
-		System.out.println(b.toString());
-	}
-
-	public String countColours() {
-		int[] colourCounter = new int[AVAILABLE_COLOURS.length];
-
-		for (COLOUR c : grid) {
-			colourCounter[c.getValue()]++;
-		}
-
-		String block = "";
-		int counter = 0;
-		for (int i : colourCounter) {
-			block += AVAILABLE_COLOURS[counter].toString() + ": " + i + System.lineSeparator();
-			counter++;
-		}
-
-		return block;
-	}
+	/*
+	 * public static void main(String[] args) { Board b = new Board();
+	 * System.out.println(b.toString()); System.out.println(b.boardHasNeighbours());
+	 * System.out.println(b.countColours());
+	 * System.out.println(b.getPossibleMoves().get(0).move[0]); if
+	 * (b.isValidMove(new int[] { 3 })) { b.makeMove(new int[] { 3 });
+	 * System.out.println("Cool"); } System.out.println(b.toString());
+	 * System.out.println(b.getPossibleMoves().get(0).move[0]); if
+	 * (b.isValidMove(new int[] { 14 })) { b.makeMove(new int[] { 14 });
+	 * System.out.println("Cool"); } System.out.println(b.toString()); }
+	 * 
+	 * public String countColours() { int[] colourCounter = new
+	 * int[AVAILABLE_COLOURS.length];
+	 * 
+	 * for (COLOUR c : grid) { colourCounter[c.getValue()]++; }
+	 * 
+	 * String block = ""; int counter = 0; for (int i : colourCounter) { block +=
+	 * AVAILABLE_COLOURS[counter].toString() + ": " + i + System.lineSeparator();
+	 * counter++; }
+	 * 
+	 * return block; }
+	 */
 }

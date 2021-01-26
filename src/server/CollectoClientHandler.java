@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
+import game.Board;
 import util.CollectoInterface;
 import util.CollectoNetworker;
 import util.Communications;
@@ -150,24 +151,18 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 
 		// ALWAYS AVAILABLE
 		if (command.equals(Communications.LS)) {
-			listUsers();
+			sendList();
 			return;
 		}
 
 		if (state.equals(State.INITIALIZED) && command.equals(Communications.Q)) {
 			server.queue(this);
 		} else if (state.equals(State.IN_GAME) && command.equals(Communications.M) && args.length > 1) {
-			if (args.length > 2) {
-				// make double move
-				game.requestMove(new int[] { Integer.parseInt(args[1]), Integer.parseInt(args[2]) }, this);
-			} else {
-				// make single move
-				game.requestMove(new int[] { Integer.parseInt(args[1]) }, this);
-			}
+			game.receiveMove(Board.moveStringToInt(args), this);
 		}
 	}
 
-	private void listUsers() throws IOException {
+	private void sendList() throws IOException {
 		String list = Communications.LS + Communications.DELIM + server.getUsers();
 		writeMessage(list);
 	}

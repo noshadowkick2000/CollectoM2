@@ -54,4 +54,8 @@ public class CollectoInterface {
 		}
 		CollectoInterface.showMessage(SHOW_MOVES + moves);
 	}
+	
+	public static void showBoard(Board board) {
+		CollectoInterface.showMessage(System.lineSeparator() + board.toString());
+	}
 }

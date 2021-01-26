@@ -12,6 +12,10 @@ public class HardStrategy implements CollectoStrategy {
 	@Override
 	public int[] getMove(Board board) {
 
+		if (board.getPossibleMoves().size() == 0) {
+			return null;
+		}
+		
 		boolean thisIsFirstPlayer = board.firstPlayerTurn;
 
 		int depth = 0;

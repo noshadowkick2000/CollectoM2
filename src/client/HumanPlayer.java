@@ -1,28 +1,19 @@
 package client;
 
+import game.Board;
 import util.CollectoInterface;
 
-public class HumanPlayer extends CollectoClientPlayer {
+public class HumanPlayer implements CollectoClientPlayer {
 
 	static private final String MOVE_FORMAT = "Select move to play, format is <firstMove>[second move]";
 	static private final String YOUR_MOVE = "It's your move";
 
-	public HumanPlayer(CollectoClient client) {
-		super(client);
-	}
-
 	@Override
-	public int[] getMove() {
-
-		try {
-			lobbyThread.join();
-		} catch (InterruptedException e) {
-			CollectoInterface.showMessage("Error joining main thread");
-		}
+	public int[] getMove(Board board) {
 
 		// TODO empty scanner in case player was typing something outside their turn
 
-		client.showBoard();
+		CollectoInterface.showBoard(board);
 
 		CollectoInterface.showMessage(YOUR_MOVE);
 
@@ -33,7 +24,7 @@ public class HumanPlayer extends CollectoClientPlayer {
 			args = CollectoInterface.requestInput(MOVE_FORMAT).split(" ");
 
 			if (args[0].equals("hint")) {
-				CollectoInterface.showPossibleMoves(client.game.board);
+				CollectoInterface.showPossibleMoves(board);
 				continue;
 			}
 
@@ -46,7 +37,7 @@ public class HumanPlayer extends CollectoClientPlayer {
 				CollectoInterface.showMessage("Move format was incorrect");
 			}
 
-			if (client.game.board.isValidMove(move)) {
+			if (board.isValidMove(move)) {
 				break;
 			} else {
 				CollectoInterface.showMessage("Move was not valid, try again");
