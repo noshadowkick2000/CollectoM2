@@ -57,31 +57,8 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 		}
 	}
 
-	public void sendMove(int[] move) {
-		try {
-			String moveMessage = Communications.M;
-			for (int m : move) {
-				moveMessage += Communications.DELIM + m;
-			}
-			writeMessage(moveMessage);
-		} catch (IOException e) {
-			disconnect();
-		}
-	}
-
 	public void showError(String description) throws IOException {
 		writeMessage(Communications.ERR + Communications.DELIM + description);
-	}
-
-	// is only called after initialization (is a precondition)
-	public void endGame(String condition) {
-		try {
-			game = null;
-			state = State.INITIALIZED;
-			writeMessage(condition);
-		} catch (IOException e) {
-			disconnect();
-		}
 	}
 
 	// Private methods
@@ -124,25 +101,37 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 			if (state.equals(State.UNINITIALIZED)) {
 				// HELLO RESPONSE
 				if (args[0].equals(Communications.H)) {
-					showMessage("Client with description: " + args[1] + " connected to Server");
-					state = State.NO_USERNAME;
-					writeMessage(Communications.H + Communications.DELIM + description);
+					hello(description);
 				}
 			} else if (state.equals(State.NO_USERNAME)) {
 				// LOGIN RESPONSE
 				if (args[0].equals(Communications.L)) {
 					name = args[1];
 					if (server.addClient(this)) {
-						showMessage("User " + args[1] + " logged on");
-						state = State.INITIALIZED;
-						writeMessage(Communications.L);
+						login(args[1]);
 					} else {
-						showMessage("User " + args[1] + " tried logging on with existing name");
-						writeMessage(Communications.AL);
+						alreadyLoggedin(args[1]);
 					}
 				}
 			}
 		}
+	}
+
+	private void hello(String description) throws IOException {
+		showMessage("Client with description: " + description + " connected to Server");
+		state = State.NO_USERNAME;
+		writeMessage(Communications.H + Communications.DELIM + description);
+	}
+
+	private void login(String newUser) throws IOException {
+		showMessage("User " + newUser + " logged on");
+		state = State.INITIALIZED;
+		writeMessage(Communications.L);
+	}
+
+	private void alreadyLoggedin(String existingUser) throws IOException {
+		showMessage("User " + existingUser + " tried logging on with existing name");
+		writeMessage(Communications.AL);
 	}
 
 	private void parseInitializedCommands(String[] args) throws IOException {
@@ -156,15 +145,46 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 		}
 
 		if (state.equals(State.INITIALIZED) && command.equals(Communications.Q)) {
-			server.queue(this);
+			queue();
 		} else if (state.equals(State.IN_GAME) && command.equals(Communications.M) && args.length > 1) {
-			game.receiveMove(Board.moveStringToInt(args), this);
+			receiveMove(Board.moveStringToInt(args));
 		}
 	}
 
 	private void sendList() throws IOException {
 		String list = Communications.LS + Communications.DELIM + server.getUsers();
 		writeMessage(list);
+	}
+
+	private void queue() {
+		server.queue(this);
+	}
+	
+	private void receiveMove(int[] move) {
+		game.receiveMove(move, this);
+	}
+	
+	public void sendMove(int[] move) {
+		try {
+			String moveMessage = Communications.M;
+			for (int m : move) {
+				moveMessage += Communications.DELIM + m;
+			}
+			writeMessage(moveMessage);
+		} catch (IOException e) {
+			disconnect();
+		}
+	}
+	
+	// is only called after initialization (is a precondition)
+	public void gameOver(String condition) {
+		try {
+			game = null;
+			state = State.INITIALIZED;
+			writeMessage(condition);
+		} catch (IOException e) {
+			disconnect();
+		}
 	}
 
 	private void showMessage(String msg) {

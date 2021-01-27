@@ -87,11 +87,11 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		try {
 
 			// Setup initial connection and execute hello protocol
-			setHello(CollectoInterface.requestInput("Enter client description"));
+			hello(CollectoInterface.requestInput("Enter client description"));
 
 			// Setup login credentials and execute protocol
 			while (true) {
-				if (setLogin(CollectoInterface.requestInput("Enter login name"))) {
+				if (login(CollectoInterface.requestInput("Enter login name"))) {
 					break;
 				}
 			}
@@ -150,7 +150,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		}
 	}
 
-	public void setHello(String clientDescription) throws IOException, InvalidResponseException {
+	public void hello(String clientDescription) throws IOException, InvalidResponseException {
 		writeMessage(Communications.H + Communications.DELIM + clientDescription);
 		CollectoInterface.showMessage("Sent Hello");
 
@@ -170,7 +170,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		}
 	}
 
-	public boolean setLogin(String loginName) throws IOException, InvalidResponseException {
+	public boolean login(String loginName) throws IOException, InvalidResponseException {
 		writeMessage(Communications.L + Communications.DELIM + loginName);
 
 		switch (awaitMessage()) {
@@ -197,13 +197,13 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 			receiveList(args);
 			break;
 		case Communications.NG:
-			receiveNewGame(args);
+			newGame(args);
 			break;
 		case Communications.M:
 			receiveMove(Board.moveStringToInt(args));
 			break;
 		case Communications.GO:
-			receiveGameOver(args);
+			gameOver(args);
 			break;
 		case Communications.ERR:
 			CollectoInterface.showMessage("You made an illegal move, try again");
@@ -231,7 +231,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 				}
 				switch (lastInput) {
 				case Communications.Q:
-					sendQueue();
+					queue();
 					break;
 				case Communications.LS:
 					sendList();
@@ -251,7 +251,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		}
 	}
 
-	public void sendQueue() throws IOException {
+	public void queue() throws IOException {
 		writeMessage(Communications.Q);
 		inQueue = !inQueue;
 		CollectoInterface.showMessage("Currently in queue: " + inQueue);
@@ -294,7 +294,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		writeMessage(Board.moveIntToString(move));
 	}
 
-	public void receiveNewGame(String[] gridPlayers) throws IOException {
+	public void newGame(String[] gridPlayers) throws IOException {
 
 		int[] grid = new int[boardLength];
 		for (int i = 0; i < grid.length; i++) {
@@ -321,7 +321,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		}
 	}
 
-	public void receiveGameOver(String[] condition) {
+	public void gameOver(String[] condition) {
 
 		switch (condition[1]) {
 		case Communications.VICTORY:

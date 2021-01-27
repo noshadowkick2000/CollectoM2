@@ -24,6 +24,21 @@ public class CollectoServerGame extends Collecto {
 		board = new Board();
 	}
 
+	synchronized public void disconnectClient(CollectoClientHandler client) {
+		showMessage("Client " + client.getName() + " disconnected");
+		playingClients.remove(client);
+		gameOver(Condition.DISCONNECT);
+	}
+
+	synchronized public void newGame() {
+
+		CollectoClientHandler playerOne = playingClients.get(0);
+		CollectoClientHandler playerTwo = playingClients.get(1);
+
+		playerOne.startGame(board.toCommunicationString(), playerOne.getName(), playerTwo.getName(), this);
+		playerTwo.startGame(board.toCommunicationString(), playerOne.getName(), playerTwo.getName(), this);
+	}
+	
 	synchronized public void receiveMove(int[] move, CollectoClientHandler player) {
 		try {
 			if (playingClients.get(board.firstPlayerTurn ? 0 : 1).equals(player)) {
@@ -49,30 +64,11 @@ public class CollectoServerGame extends Collecto {
 		}
 	}
 
-	synchronized public void disconnectClient(CollectoClientHandler client) {
-		showMessage("Client " + client.getName() + " disconnected");
-		playingClients.remove(client);
-		endGame(Condition.DISCONNECT);
-	}
-
-	private void showMessage(String msg) {
-		CollectoInterface.showMessage("Game " + gameId + ": " + msg);
-	}
-
-	synchronized public void startGame() {
-
-		CollectoClientHandler playerOne = playingClients.get(0);
-		CollectoClientHandler playerTwo = playingClients.get(1);
-
-		playerOne.startGame(board.toCommunicationString(), playerOne.getName(), playerTwo.getName(), this);
-		playerTwo.startGame(board.toCommunicationString(), playerOne.getName(), playerTwo.getName(), this);
-	}
-
-	synchronized public void endGame(Condition condition) {
+	synchronized public void gameOver(Condition condition) {
 
 		if (condition.equals(Condition.DISCONNECT)) {
 			try {
-				playingClients.get(0).endGame(Communications.GO + Communications.DELIM + Communications.DISCONNECT
+				playingClients.get(0).gameOver(Communications.GO + Communications.DELIM + Communications.DISCONNECT
 						+ Communications.DELIM + playingClients.get(0).getName());
 			} catch (IndexOutOfBoundsException e) {
 				showMessage("both clients disconnected");
@@ -83,25 +79,24 @@ public class CollectoServerGame extends Collecto {
 
 			switch (condition) {
 			case VICTORY_PLAYER_ONE:
-				playerOne.endGame(Communications.GO + Communications.DELIM + Communications.VICTORY
+				playerOne.gameOver(Communications.GO + Communications.DELIM + Communications.VICTORY
 						+ Communications.DELIM + playerOne.getName());
-				playerTwo.endGame(Communications.GO + Communications.DELIM + Communications.VICTORY
+				playerTwo.gameOver(Communications.GO + Communications.DELIM + Communications.VICTORY
 						+ Communications.DELIM + playerOne.getName());
 				break;
 			case VICTORY_PLAYER_TWO:
-				playerOne.endGame(Communications.GO + Communications.DELIM + Communications.VICTORY
+				playerOne.gameOver(Communications.GO + Communications.DELIM + Communications.VICTORY
 						+ Communications.DELIM + playerTwo.getName());
-				playerTwo.endGame(Communications.GO + Communications.DELIM + Communications.VICTORY
+				playerTwo.gameOver(Communications.GO + Communications.DELIM + Communications.VICTORY
 						+ Communications.DELIM + playerTwo.getName());
 				break;
 			case DRAW:
-				playerOne.endGame(Communications.GO + Communications.DELIM + Communications.DRAW);
-				playerTwo.endGame(Communications.GO + Communications.DELIM + Communications.DRAW);
+				playerOne.gameOver(Communications.GO + Communications.DELIM + Communications.DRAW);
+				playerTwo.gameOver(Communications.GO + Communications.DELIM + Communications.DRAW);
 				break;
 			default:
 				break;
 			}
-
 		}
 
 		playingClients.clear();
@@ -115,16 +110,20 @@ public class CollectoServerGame extends Collecto {
 		int playerTwoPoints = board.countPoints(false);
 
 		if (playerOnePoints == playerTwoPoints) {
-			endGame(Condition.DRAW);
+			gameOver(Condition.DRAW);
 			showMessage("Draw with each " + playerOnePoints + " points");
 			return;
 		} else if (playerOnePoints > playerTwoPoints) {
-			endGame(Condition.VICTORY_PLAYER_ONE);
+			gameOver(Condition.VICTORY_PLAYER_ONE);
 			showMessage("Player one won with " + playerOnePoints + " points");
 			return;
 		} else {
 			showMessage("Player two won with " + playerTwoPoints + " points");
-			endGame(Condition.VICTORY_PLAYER_TWO);
+			gameOver(Condition.VICTORY_PLAYER_TWO);
 		}
+	}
+	
+	private void showMessage(String msg) {
+		CollectoInterface.showMessage("Game " + gameId + ": " + msg);
 	}
 }

@@ -35,8 +35,8 @@ class clientTest {
 		
 		client.setClientPlayer(CollectoClient.PLAYER_OPTIONS[0]);
 		try {
-			client.setHello(DESCRIPTION);
-			client.setLogin(NAME);
+			client.hello(DESCRIPTION);
+			client.login(NAME);
 			
 			assertEquals(NAME, client.loginName);
 			

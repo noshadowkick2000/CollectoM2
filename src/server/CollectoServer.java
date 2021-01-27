@@ -116,7 +116,7 @@ public class CollectoServer {
 		queuedClients.remove(playerOne);
 		queuedClients.remove(playerTwo);
 
-		game.startGame();
+		game.newGame();
 	}
 
 	// MAIN METHOD ----------------------------------------------------------------
