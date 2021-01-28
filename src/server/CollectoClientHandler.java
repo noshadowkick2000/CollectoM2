@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 
-import game.Board;
 import util.CollectoInterface;
 import util.CollectoNetworker;
 import util.Communications;
@@ -73,12 +72,9 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 
 	private void handleInput() {
 		String input;
-
 		try {
-			input = in.readLine();
-			while (input != null) {
+			while ((input = awaitMessage())!= null) {
 				parseCommand(input);
-				input = in.readLine();
 			}
 		} catch (IOException e) {
 			disconnect();
@@ -90,13 +86,13 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 
 		if (state.equals(State.UNINITIALIZED) || state.equals(State.NO_USERNAME)) {
 			// contains at least hello and description
-			parseInitialization(commands);
+			parseInitializationCommands(commands);
 		} else {
 			parseInitializedCommands(commands);
 		}
 	}
 
-	private void parseInitialization(String[] args) throws IOException {
+	private void parseInitializationCommands(String[] args) throws IOException {
 		if (args.length > 1) {
 			if (state.equals(State.UNINITIALIZED)) {
 				// HELLO RESPONSE
@@ -147,7 +143,7 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 		if (state.equals(State.INITIALIZED) && command.equals(Communications.Q)) {
 			queue();
 		} else if (state.equals(State.IN_GAME) && command.equals(Communications.M) && args.length > 1) {
-			receiveMove(Board.moveStringToInt(args));
+			receiveMove(moveStringToInt(args));
 		}
 	}
 

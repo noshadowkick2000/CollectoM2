@@ -69,12 +69,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 	private void handleInitialization() {
 
 		// Setup host adress and port
-		while (true) {
-			String[] args = CollectoInterface.requestInput(USAGE).split(" ");
-			if (setConnection(args)) {
-				break;
-			}
-		}
+		while (!setConnection(CollectoInterface.requestInput(USAGE).split(" ")));
 
 		// Setup player type and difficulty
 		while (true) {
@@ -90,15 +85,11 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 			hello(CollectoInterface.requestInput("Enter client description"));
 
 			// Setup login credentials and execute protocol
-			while (true) {
-				if (login(CollectoInterface.requestInput("Enter login name"))) {
-					break;
-				}
-			}
+			while (!login(CollectoInterface.requestInput("Enter login name")));
 
 			startLobby();
 			while (true) {
-				parseServerInput();
+				parseServerInput(awaitMessage().split(Communications.DELIM));
 			}
 		} catch (IOException e) {
 			CollectoInterface.showMessage("Connection error: server disconnected");
@@ -189,8 +180,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		lobbyTUI();
 	}
 
-	public void parseServerInput() throws IOException {
-		String[] args = awaitMessage().split(Communications.DELIM);
+	public void parseServerInput(String[] args) throws IOException {
 
 		switch (args[0]) {
 		case Communications.LS:
@@ -200,7 +190,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 			newGame(args);
 			break;
 		case Communications.M:
-			receiveMove(Board.moveStringToInt(args));
+			receiveMove(moveStringToInt(args));
 			break;
 		case Communications.GO:
 			gameOver(args);
@@ -240,8 +230,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 					help();
 					break;
 				case EX:
-					CollectoInterface.showMessage("Shutting down");
-					System.exit(0);
+					exit();
 				default:
 					break;
 				}
@@ -284,6 +273,10 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 	}
 
 	public void sendMove() throws IOException {
+		
+		// By waiting for the lobby thread, we ensure that the user closes the lobby
+		// by pressing enter, before the game starts, this way the lobby prints and game
+		// prints do not interfere with each other.
 		try {
 			lobbyThread.join();
 		} catch (InterruptedException e) {
@@ -291,7 +284,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		}
 
 		int[] move = localPlayer.getMove(game.board);
-		writeMessage(Board.moveIntToString(move));
+		writeMessage(moveIntToString(move));
 	}
 
 	public void newGame(String[] gridPlayers) throws IOException {
@@ -344,6 +337,11 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 
 	protected void help() {
 		CollectoInterface.showMessage(LOBBY_USAGE);
+	}
+	
+	public void exit() {
+		CollectoInterface.showMessage("Shutting down");
+		System.exit(0);
 	}
 
 	public static void main(String[] args) {
