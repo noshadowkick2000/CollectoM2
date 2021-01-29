@@ -129,4 +129,10 @@ class boardTests {
 		board.makeMove(new int[] { 0 });
 		assertEquals(0, board.p1Balls.size());
 	}
+
+	@Test
+	void communicationTest() {
+		board = new Board(CORRECT_GRID_EXAMPLE);
+		assertEquals(CORRECT_GRID_EXAMPLE_STRING, board.toCommunicationString());
+	}
 }

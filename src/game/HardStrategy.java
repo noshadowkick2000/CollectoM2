@@ -5,27 +5,17 @@ import java.util.List;
 import game.Board.Move;
 import util.CollectoInterface;
 
-/**
- * The Class HardStrategy.
- */
 public class HardStrategy implements CollectoStrategy {
 
-	/** Maximum depth for the minmax algorithm */
 	private static final int MAX_DEPTH = 4;
 
-	/**
-	 * Returns a move to be played on the passed Board from the Strategy
-	 *
-	 * @param board: the Board on which to play the move.
-	 * @return the move to be played as an Integer array
-	 */
 	@Override
 	public int[] getMove(Board board) {
 
 		if (board.getPossibleMoves().size() == 0) {
 			return null;
 		}
-
+		
 		boolean thisIsFirstPlayer = board.firstPlayerTurn;
 
 		int depth = 0;
@@ -37,19 +27,6 @@ public class HardStrategy implements CollectoStrategy {
 		return nextMoves.get(getHighestScore(scores, true)).move;
 	}
 
-	/**
-	 * Implements minimax algorithm. Looks ahead at for all moves up to a certain
-	 * depth and returns the moves associated with the best score. The score is
-	 * determined by the amount of points this player has - the amount of points the
-	 * opponent has.
-	 *
-	 * @param maximizing:        true if next move is to be made by opponent player.
-	 * @param board:             the Board on which this move has to be played.
-	 * @param depth:             the current depth inside of the minimax algrithm.
-	 * @param thisIsFirstPlayer: true if this player is the first player in the
-	 *                           game.
-	 * @return the score of this node.
-	 */
 	private int minMax(boolean maximizing, Board board, int depth, boolean thisIsFirstPlayer) {
 		if (board.noMovesLeft() || depth > MAX_DEPTH) {
 			return board.countPoints(thisIsFirstPlayer) - board.countPoints(!thisIsFirstPlayer);
@@ -66,20 +43,6 @@ public class HardStrategy implements CollectoStrategy {
 		}
 	}
 
-	/**
-	 * Subimplementation for minimax algorithm.
-	 *
-	 * @param nextMoves:         List containing all of the Moves that can currently
-	 *                           be played on the passed board.
-	 * @param scores:            Array containing the scores corresponding to each
-	 *                           Move passed in nextMoves.
-	 * @param maximizing:        true if next move is to be made by opponent player.
-	 * @param board:             the Board on which this move has to be played.
-	 * @param depth:             the current depth inside of the minimax algrithm.
-	 * @param thisIsFirstPlayer: true if this player is the first player in the
-	 *                           game.
-	 * @return the score of this node.
-	 */
 	private void crunchNodes(boolean maximizing, List<Move> nextMoves, int[] scores, Board board, int depth,
 			boolean thisIsFirstPlayer) {
 		for (int i = 0; i < nextMoves.size(); i++) {
@@ -89,15 +52,6 @@ public class HardStrategy implements CollectoStrategy {
 		}
 	}
 
-	/**
-	 * Gets the highest score from the given array scores. Will return the index of
-	 * the highest score in the array if returnIndex == true.
-	 *
-	 * @param scores:      array containing the integer scores to be compared.
-	 * @param returnIndex: true if this function should return an index rather than
-	 *                     a score.
-	 * @return the highest score from scores
-	 */
 	private int getHighestScore(int[] scores, boolean returnIndex) {
 		int index = 0;
 		int highscore = scores[index];
@@ -110,13 +64,6 @@ public class HardStrategy implements CollectoStrategy {
 		return returnIndex ? index : highscore;
 	}
 
-	/**
-	 * Gets the lowest score from the given array scores. Will return the index of
-	 * the lowest score in the array if returnIndex == true.
-	 *
-	 * @param scores: array containing the integer scores to be compared.
-	 * @return the lowest score from scores
-	 */
 	private int getLowestScore(int[] scores) {
 		int lowestScore = scores[0];
 		for (int i = 1; i < scores.length; i++) {

@@ -7,8 +7,6 @@ import java.io.IOException;
 import org.junit.jupiter.api.Test;
 
 import client.CollectoClient;
-import game.Board;
-import util.CollectoNetworker;
 import util.Communications;
 
 class collectoNetworkerTest {
@@ -41,11 +39,5 @@ class collectoNetworkerTest {
 		cn.setConnection(clientTest.HOST);
 		cn.writeMessage(Communications.H + Communications.DELIM + clientTest.DESCRIPTION);
 		assertTrue(cn.awaitMessage().contains(Communications.H));
-	}
-	
-	@Test
-	void communicationTest() {
-		Board board = new Board(boardTests.CORRECT_GRID_EXAMPLE);
-		assertEquals(boardTests.CORRECT_GRID_EXAMPLE_STRING, CollectoNetworker.toCommunicationString(board));
 	}
 }

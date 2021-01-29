@@ -49,7 +49,7 @@ class serverTest {
 		// start first client with name 0
 
 		CollectoInterface.showDebugMessage("start client with name 0");
-		server.createNewHandler();
+		server.createNewHandler(DESCRIPTION);
 		CollectoInterface.requestInput("");
 
 		assertEquals(1, server.connectedClients.size());
@@ -67,7 +67,7 @@ class serverTest {
 		// start first client with name 0
 
 		CollectoInterface.showDebugMessage("start first client with name 0 " + STEP);
-		server.createNewHandler();
+		server.createNewHandler(DESCRIPTION);
 		CollectoInterface.requestInput("");
 
 		assertEquals(1, server.connectedClients.size());
@@ -76,7 +76,7 @@ class serverTest {
 		// start second client with name 1
 
 		CollectoInterface.showDebugMessage("start second client with name 1 " + STEP);
-		server.createNewHandler();
+		server.createNewHandler(DESCRIPTION);
 		CollectoInterface.requestInput("");
 
 		assertEquals(2, server.connectedClients.size());
@@ -104,7 +104,7 @@ class serverTest {
 		// start first client with name 0
 
 		CollectoInterface.showDebugMessage("start first client with name 0 " + STEP);
-		server.createNewHandler();
+		server.createNewHandler(DESCRIPTION);
 		CollectoInterface.requestInput("");
 
 		assertEquals(1, server.connectedClients.size());
@@ -114,7 +114,7 @@ class serverTest {
 		// client should show notification of failed login
 
 		CollectoInterface.showDebugMessage("start second client with name 0 " + STEP);
-		server.createNewHandler();
+		server.createNewHandler(DESCRIPTION);
 		CollectoInterface.requestInput("");
 
 		assertEquals(1, server.connectedClients.size());
@@ -135,14 +135,14 @@ class serverTest {
 		// start first client with name 0
 
 		CollectoInterface.showDebugMessage("start first client with name 0 " + STEP);
-		server.createNewHandler();
+		server.createNewHandler(DESCRIPTION);
 		CollectoInterface.requestInput("");
 
 		// start second client with name 1
 		// note reference clients will automatically start playing, ignore this
 
 		CollectoInterface.showDebugMessage("start second client with name 1 " + STEP);
-		server.createNewHandler();
+		server.createNewHandler(DESCRIPTION);
 		CollectoInterface.requestInput("");
 
 		String usersString = server.getUsers();

@@ -17,84 +17,40 @@ import util.CollectoInterface;
 import util.CollectoNetworker;
 import util.Communications;
 
-/**
- * The Class CollectoClient.
- */
 public class CollectoClient extends CollectoNetworker implements Runnable {
 
-	/** Usage for inputting host. */
 	private static final String USAGE = "Input server details with this format: <host-adress>_<port>";
-
 	private static final String CHOOSE_HUMAN = "HUMAN";
 	private static final String CHOOSE_AI_EASY = "AI EASY";
 	private static final String CHOOSE_AI_MEDIUM = "AI MEDIUM";
 	private static final String CHOOSE_AI_HARD = "AI HARD";
-
-	/**
-	 * PLAYER_OPTIONS holds the possible options for the user to choose as local
-	 * player.
-	 */
 	public static final String[] PLAYER_OPTIONS = new String[] { CHOOSE_HUMAN, CHOOSE_AI_EASY, CHOOSE_AI_MEDIUM,
 			CHOOSE_AI_HARD };
 
-	/** Usage and notification for being in the lobby. */
-	static private final String LOBBY_USAGE = "You are waiting in the lobby commands are:";
-
-	static private final String HELP = "HELP";
-	static private final String EX = "EXIT";
-
-	/**
-	 * LOBBY_COMMANDS holds the possible options/commands available to the user in
-	 * the lobby.
-	 */
-	static private final String[] LOBBY_COMMANDS = new String[] { Communications.Q, Communications.LS, HELP, EX };
-
-	/**
-	 * sock is shared over the whole CollectoClient to enable closing of the sock in
-	 * separate execution paths.
-	 */
 	private Socket sock;
 
+	private static final int boardLength = Board.BOARD_SIZE * Board.BOARD_SIZE;
+
 	static private final String GAME_SEPERATOR = "------------NEW GAME------------";
+	static private final String LOBBY_USAGE = "You are waiting in the lobby commands are:";
+	static private final String GAME_OVER = "Game over, you will be sent back to the lobby";
+	static private final String HELP = "HELP";
+	static private final String EX = "EXIT";
+	static private final String[] LOBBY_COMMANDS = new String[] { Communications.Q, Communications.LS, HELP, EX };
 
-	/**
-	 * gameAvailable is used to track whether a NEWGAME protocol has been sent to
-	 * the client. This way the lobby loop knows when to close.
-	 */
 	protected boolean gameAvailable = false;
-
-	/**
-	 * inQueue tracks whether the client is in a queue, since the server does not
-	 * send a reply to QUEUE.
-	 */
 	protected boolean inQueue = false;
 
-	/**
-	 * The lobby thread. Used to join the lobbyThread with the main Thread handling
-	 * the protocols while in a game.
-	 */
 	protected Thread lobbyThread;
 
-	/** The game. */
 	public Collecto game;
 
-	/** The local player. */
 	private CollectoClientPlayer localPlayer;
-
-	/** The local player turn. */
 	public boolean localPlayerTurn = false;
-
-	/** The local is first player. */
 	public boolean localIsFirstPlayer;
 
-	/** The login name. */
 	public String loginName;
 
-	/**
-	 * Displays the winner of the current local game.
-	 *
-	 * @param winnerName, contains the name of the winner sent by the server.
-	 */
 	public void showWinner(String winnerName) {
 		if (winnerName.equals(loginName)) {
 			CollectoInterface
@@ -105,31 +61,15 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		}
 	}
 
-	/**
-	 * Starts the program and the initialization sequence.
-	 *
-	 * @throws IOException Signals that an I/O exception has occurred. Generally
-	 *                     indicates that the connection has closed.
-	 */
-	public void connectServer() {
+	public void connectServer() throws IOException {
 		handleInitialization();
-		try {
-			sock.close();
-		} catch (IOException e) {
-			CollectoInterface.showMessage("Could not close socket");
-		}
+		sock.close();
 	}
 
-	/**
-	 * Handle initialization. Sequentially calls the setConnection(),
-	 * setClietPlayer(), hello() and login(), using the input from the console as
-	 * the parameters.
-	 */
 	private void handleInitialization() {
 
 		// Setup host adress and port
-		while (!setConnection(CollectoInterface.requestInput(USAGE).split(" ")))
-			;
+		while (!setConnection(CollectoInterface.requestInput(USAGE).split(" ")));
 
 		// Setup player type and difficulty
 		while (true) {
@@ -145,8 +85,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 			hello(CollectoInterface.requestInput("Enter client description"));
 
 			// Setup login credentials and execute protocol
-			while (!login(CollectoInterface.requestInput("Enter login name")))
-				;
+			while (!login(CollectoInterface.requestInput("Enter login name")));
 
 			startLobby();
 			while (true) {
@@ -159,14 +98,6 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		}
 	}
 
-	/**
-	 * Connects the client to the server and initializes sock, in, and out
-	 *
-	 * @param host: 2 dimensional String array, with host[0] being the host address
-	 *              of the host in numerical form and host[1] being the port of the
-	 *              host through which to communicate.
-	 * @return true, if successful, else false.
-	 */
 	public boolean setConnection(String[] host) {
 		if (host.length != 2) {
 			return false;
@@ -187,13 +118,6 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		}
 	}
 
-	/**
-	 * Sets the type of CollectoClientPlayer to be used on this client, using
-	 * playerType.
-	 *
-	 * @param playerType: should be a String inside of PLAYER_OPTIONS.
-	 * @return true if successful and playerType != null, else false.
-	 */
 	public boolean setClientPlayer(String playerType) {
 		if (playerType == null) {
 			return false;
@@ -217,15 +141,6 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		}
 	}
 
-	/**
-	 * Start initialization client-server connection with the HELLO protocol.
-	 *
-	 * @param clientDescription: the client description.
-	 * @throws IOException               Signals that an I/O exception has occurred.
-	 *                                   Generally indicates that the connection has
-	 *                                   closed.
-	 * @throws InvalidResponseException: the invalid response exception.
-	 */
 	public void hello(String clientDescription) throws IOException, InvalidResponseException {
 		writeMessage(Communications.H + Communications.DELIM + clientDescription);
 		CollectoInterface.showMessage("Sent Hello");
@@ -246,17 +161,6 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		}
 	}
 
-	/**
-	 * Complete initialization client-server connection with the LOGIN protocol.
-	 *
-	 * @param loginName the user name with which to log on to the server.
-	 * @return true if successful and loginName is not an existing name on the
-	 *         server.
-	 * @throws IOException               Signals that an I/O exception has occurred.
-	 *                                   Generally indicates that the connection has
-	 *                                   closed.
-	 * @throws InvalidResponseException: the invalid response exception.
-	 */
 	public boolean login(String loginName) throws IOException, InvalidResponseException {
 		writeMessage(Communications.L + Communications.DELIM + loginName);
 
@@ -272,21 +176,10 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		}
 	}
 
-	/**
-	 * Runnable method, starts lobbyTUI().
-	 */
 	public void run() {
 		lobbyTUI();
 	}
 
-	/**
-	 * Activates the methods associated with the following server protocols: LIST,
-	 * NEWGAME, MOVE, GAMEOVER, and ERROR.
-	 *
-	 * @param args: the full message from the server in array form.
-	 * @throws IOException Signals that an I/O exception has occurred. Generally
-	 *                     indicates that the connection has closed.
-	 */
 	public void parseServerInput(String[] args) throws IOException {
 
 		switch (args[0]) {
@@ -308,18 +201,11 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		}
 	}
 
-	/**
-	 * Start a new thread running the lobbyTUI() method.
-	 */
 	public void startLobby() {
 		lobbyThread = new Thread(this);
 		lobbyThread.start();
 	}
 
-	/**
-	 * Read input from the console and call the method corresponding to any valid
-	 * commands. This method will block until input has been provided.
-	 */
 	private void lobbyTUI() {
 		try {
 			CollectoInterface.showMessage(LOBBY_USAGE);
@@ -354,28 +240,12 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		}
 	}
 
-	/**
-	 * Implements the QUEUE protocol and sends a request to the server to queue.
-	 *
-	 * @throws IOException Signals that an I/O exception has occurred. Generally
-	 *                     indicates that the connection has closed.
-	 */
 	public void queue() throws IOException {
 		writeMessage(Communications.Q);
 		inQueue = !inQueue;
 		CollectoInterface.showMessage("Currently in queue: " + inQueue);
 	}
 
-	/**
-	 * Implements the LIST protocol and should be called when LIST is received from
-	 * the server. Reads the values of the list and prints them in human readable
-	 * form
-	 *
-	 * @param list: the full message from the server containing the LIST message and
-	 *              the names of all connected clients.
-	 * @throws IOException Signals that an I/O exception has occurred. Generally
-	 *                     indicates that the connection has closed.
-	 */
 	public void receiveList(String[] list) throws IOException {
 		String connectedClients = "";
 		for (int i = 1; i < list.length; i++) {
@@ -385,26 +255,10 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 				+ System.lineSeparator() + connectedClients);
 	}
 
-	/**
-	 * Implements the LIST protocol and sends a request to the server to send back a
-	 * list of connected clients.
-	 *
-	 * @throws IOException Signals that an I/O exception has occurred. Generally
-	 *                     indicates that the connection has closed.
-	 */
 	public void sendList() throws IOException {
 		writeMessage(Communications.LS);
 	}
 
-	/**
-	 * Implements the MOVE protocol and is called when the server has sent a MOVE
-	 * message to make a move on the local game. Will call sendMove() if it's the
-	 * local player's turn.
-	 *
-	 * @param move: the move to be made on the board as an integer array.
-	 * @throws IOException Signals that an I/O exception has occurred. Generally
-	 *                     indicates that the connection has closed.
-	 */
 	public void receiveMove(int[] move) throws IOException {
 		if (localPlayerTurn) {
 			game.board.makeMove(move);
@@ -418,16 +272,8 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		localPlayerTurn = !localPlayerTurn;
 	}
 
-	/**
-	 * Implements the MOVE protocol and sends a message to the server containing the
-	 * move to be played by the local player. This move is returned from calling
-	 * getMove() from the localPlayer
-	 *
-	 * @throws IOException Signals that an I/O exception has occurred. Generally
-	 *                     indicates that the connection has closed.
-	 */
 	public void sendMove() throws IOException {
-
+		
 		// By waiting for the lobby thread, we ensure that the user closes the lobby
 		// by pressing enter, before the game starts, this way the lobby prints and game
 		// prints do not interfere with each other.
@@ -441,20 +287,9 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		writeMessage(moveIntToString(move));
 	}
 
-	/**
-	 * Implements the NEWGAME protocol and is called when NEWGAME is received. The
-	 * parameters of the NEWGAME protocol, which contains the layout of the board,
-	 * are passed through the parameter and used to initialize the local game
-	 *
-	 * @param gridPlayers: full message from the server containing the MOVE
-	 *                     protocol, the board state, and the players in their
-	 *                     playing order
-	 * @throws IOException Signals that an I/O exception has occurred. Generally
-	 *                     indicates that the connection has closed.
-	 */
 	public void newGame(String[] gridPlayers) throws IOException {
 
-		int[] grid = new int[Board.BOARD_LENGTH];
+		int[] grid = new int[boardLength];
 		for (int i = 0; i < grid.length; i++) {
 			grid[i] = Integer.parseInt(gridPlayers[i + 1]);
 		}
@@ -479,14 +314,6 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		}
 	}
 
-	/**
-	 * Implements the GAMEOVER protocol and is called when GAMEOVER is received.
-	 * Will cleanup the local game and start a new lobby TUI.
-	 *
-	 * @param condition: the full message from the server containing the GAMEOVER
-	 *                   protocol, the win condition and possibly the winner's user
-	 *                   name.
-	 */
 	public void gameOver(String[] condition) {
 
 		switch (condition[1]) {
@@ -502,33 +329,27 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		}
 
 		game.board = null;
-		CollectoInterface.showMessage("Game over, you will be sent back to the lobby");
+		CollectoInterface.showMessage(GAME_OVER);
 		gameAvailable = false;
 
 		startLobby();
 	}
 
-	/**
-	 * Show the reminder for the lobby.
-	 */
 	protected void help() {
 		CollectoInterface.showMessage(LOBBY_USAGE);
 	}
-
-	/**
-	 * Closes the program.
-	 */
+	
 	public void exit() {
 		CollectoInterface.showMessage("Shutting down");
 		System.exit(0);
 	}
 
-	/**
-	 * The main method.
-	 *
-	 * @param args the parameters
-	 */
 	public static void main(String[] args) {
-		(new CollectoClient()).connectServer();
+		CollectoClient client = new CollectoClient();
+
+		try {
+			client.connectServer();
+		} catch (IOException e) {
+		}
 	}
 }

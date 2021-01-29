@@ -1,10 +1,13 @@
 package game;
 
-/**
- * The Class Collecto.
- */
 public class Collecto {
 	
-	/** The board. */
+	public enum Condition {
+		VICTORY_PLAYER_ONE,
+		VICTORY_PLAYER_TWO,
+		DISCONNECT,
+		DRAW
+	}
+	
 	public Board board;
 }

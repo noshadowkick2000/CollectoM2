@@ -11,39 +11,18 @@ import java.util.List;
 import util.CollectoInterface;
 import util.Communications;
 
-/**
- * The Class CollectoServer.
- */
 public class CollectoServer implements Runnable {
 
-	/**
-	 * The connected initialized clients represented by their respective client
-	 * handlers.
-	 */
 	public List<CollectoClientHandler> connectedClients = new ArrayList<CollectoClientHandler>();
-
-	/** The clients who are currently queueing for a game. */
 	public List<CollectoClientHandler> queuedClients = new ArrayList<CollectoClientHandler>();
 
-	/**
-	 * The next id for each new game, is used to distinguish between messages from
-	 * different games
-	 */
 	private int newId = 0;
 
-	/** The server socket used to create the sockets for the client handlers. */
 	public ServerSocket ss;
-
-	/** The description of this server. */
-	public String description = "";
 
 	// Constructors and Public methods
 	// ----------------------------------------------------------------------------
 
-	/**
-	 * Requests and sets the server port and description, and calls the methods to
-	 * create the server socket and the method to accept new clients.
-	 */
 	public void setupServer() {
 		int port = 0;
 		while (true) {
@@ -55,24 +34,16 @@ public class CollectoServer implements Runnable {
 			}
 		}
 
-		description = CollectoInterface.requestInput("Enter the server description");
+		String description = CollectoInterface.requestInput("Enter the server description");
 
 		try {
 			createServerSocket(port);
-			acceptNewClients();
+			acceptNewClients(description);
 		} catch (IOException e) {
 			System.exit(-1);
 		}
 	}
 
-	/**
-	 * Creates the server socket on the local host using the passed port.
-	 *
-	 * @param port: the port on which to create the ServerSocket
-	 * @throws UnknownHostException the unknown host exception
-	 * @throws IOException          Signals that an I/O exception has occurred.
-	 *                              Generally indicates client has disconnected.
-	 */
 	public void createServerSocket(int port) throws UnknownHostException, IOException {
 
 		ss = new ServerSocket(port, 0, InetAddress.getLocalHost());
@@ -81,66 +52,35 @@ public class CollectoServer implements Runnable {
 
 	}
 
-	/**
-	 * Creates a new thread to listen for a close command in the server console and
-	 * starts a loop to accept new clients.
-	 *
-	 * @throws IOException Signals that an I/O exception has occurred. Generally
-	 *                     indicates client has disconnected.
-	 */
-	public void acceptNewClients() throws IOException {
+	public void acceptNewClients(String description) throws IOException {
 		(new Thread(this)).start();
 
 		while (true) {
-			createNewHandler();
+			createNewHandler(description);
 		}
 	}
 
-	/**
-	 * Creates a new client handler.
-	 *
-	 * @throws IOException Signals that an I/O exception has occurred. Generally
-	 *                     indicates client has disconnected.
-	 */
-	synchronized public void createNewHandler() throws IOException {
+	synchronized public void createNewHandler(String description) throws IOException {
 		Socket sock = ss.accept();
 		CollectoInterface.showMessage("Client connected");
-		(new Thread((new CollectoClientHandler(sock, this)))).start();
+		(new Thread((new CollectoClientHandler(sock, this, description)))).start();
 	}
 
-	/**
-	 * Run implementation of the Runnable Interface. Listens for any input from the
-	 * console. If there is any, call exit().
-	 */
 	public void run() {
 		CollectoInterface.requestInput("Press enter to close the server");
 		exit();
 	}
 
-	/**
-	 * Adds the client handler to the List of connected clients, if the userName of
-	 * the client is unique. Only call this method once the client has sent the
-	 * HELLO protocol.
-	 *
-	 * @param client: the client handler assigned to the client.
-	 * @return true if user name is unique and client has been added to
-	 *         connectedClients, else false
-	 */
+	// only called once name has been established
 	// returns true if succesful
-	synchronized public boolean addClient(CollectoClientHandler client, String userName) {
-		if (hasExistingLogin(userName))
+	synchronized public boolean addClient(CollectoClientHandler client) {
+		if (hasExistingLogin(client.getName()))
 			return false;
 		CollectoInterface.showMessage("Client " + client.getName() + " initialized");
 		connectedClients.add(client);
 		return true;
 	}
 
-	/**
-	 * Removes the client from the List of connectedClients and queuedClients in
-	 * case the client handler was in the queue as well.
-	 *
-	 * @param client: the client handler assigned to the client.
-	 */
 	synchronized public void removeClient(CollectoClientHandler client) {
 		CollectoInterface.showMessage("Client " + client.getName() + " disconnected");
 		connectedClients.remove(client);
@@ -149,13 +89,6 @@ public class CollectoServer implements Runnable {
 		}
 	}
 
-	/**
-	 * Implements the QUEUE protocol. Add the passed CollectoClientHandler to the
-	 * queuedClients List and check whether there are enough people in the queue to
-	 * start a newgame. If so, call startNewGame()
-	 *
-	 * @param client the client
-	 */
 	synchronized public void queue(CollectoClientHandler client) {
 
 		if (queuedClients.contains(client)) {
@@ -170,12 +103,6 @@ public class CollectoServer implements Runnable {
 		}
 	}
 
-	/**
-	 * Implements the LIST protocol. Returns a string containing all of the user
-	 * names of the clients in connectedClients.
-	 *
-	 * @return a string containing all of the user names connected to this server.
-	 */
 	public String getUsers() {
 		String users = "";
 		for (int i = 0; i < connectedClients.size(); i++) {
@@ -188,9 +115,6 @@ public class CollectoServer implements Runnable {
 		return users;
 	}
 
-	/**
-	 * Closes the ServerSocket of this server and exits the program.
-	 */
 	public void exit() {
 		try {
 			CollectoInterface.showMessage("Shutting down");
@@ -204,14 +128,6 @@ public class CollectoServer implements Runnable {
 	// Private methods
 	// ---------------------------------------------------------------------------------------------
 
-	/**
-	 * Checks for existing username in connectedClients equal to the passed
-	 * parameter.
-	 *
-	 * @param user: the user name to which to compare the existing users names.
-	 * @return true if there is an existing client connected with the same user name
-	 *         as user.
-	 */
 	private boolean hasExistingLogin(String user) {
 		for (CollectoClientHandler c : connectedClients) {
 			if (c.getName().equals(user)) {
@@ -221,11 +137,6 @@ public class CollectoServer implements Runnable {
 		return false;
 	}
 
-	/**
-	 * Starts new game by creating a CollectoServerGame instance and assigning the 2
-	 * lowest client handler in the queue to the game. Also removes these client
-	 * handlers from the queue.
-	 */
 	synchronized private void startNewGame() {
 		CollectoClientHandler playerOne = queuedClients.get(0);
 		CollectoClientHandler playerTwo = queuedClients.get(1);
@@ -240,11 +151,6 @@ public class CollectoServer implements Runnable {
 
 	// MAIN METHOD ----------------------------------------------------------------
 
-	/**
-	 * The main method.
-	 *
-	 * @param args the arguments
-	 */
 	public static void main(String[] args) {
 		(new CollectoServer()).setupServer();
 	}
