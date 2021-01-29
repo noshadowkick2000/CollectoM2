@@ -5,15 +5,34 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import util.Communications;
-
+/**
+ * The Class Board.
+ */
 public class Board {
 
+	/**
+	 * The Class Move. Move is used to store the possible moves on the current
+	 * Board. It also stores the resulting Board of the move and a List containing
+	 * the balls which are won by playing that move.
+	 */
 	public class Move {
+
+		/** The Board which results from making this move on the current Board */
 		public Board board;
+
+		/** The move as an Integer array. */
 		public int[] move;
+
+		/** The balls which are removed from the board as a result of this move. */
 		public List<COLOUR> gainedBalls;
 
+		/**
+		 * Instantiates a new Move for a single move
+		 *
+		 * @param board:       the resulting Board
+		 * @param move:        the move
+		 * @param gainedBalls: the gained balls
+		 */
 		// move is the number of the move that results in the given board
 		public Move(Board board, int move, List<COLOUR> gainedBalls) {
 			this.board = board;
@@ -21,6 +40,13 @@ public class Board {
 			this.gainedBalls = gainedBalls;
 		}
 
+		/**
+		 * Instantiates a new Move for a double move.
+		 *
+		 * @param board:       the resulting Board
+		 * @param move:        the move
+		 * @param gainedBalls: the gained balls
+		 */
 		// move is the number of the move that results in the given board
 		public Move(Board board, int[] move, List<COLOUR> gainedBalls) {
 			this.board = board;
@@ -28,6 +54,12 @@ public class Board {
 			this.gainedBalls = gainedBalls;
 		}
 
+		/**
+		 * To string. Prints the move with spaces in between the numbers if it is a
+		 * double move.
+		 *
+		 * @return the String representation of the Move
+		 */
 		public String toString() {
 			String moves = "";
 			for (int m : move) {
@@ -37,10 +69,20 @@ public class Board {
 		}
 	}
 
+	/** Length of one side of the Board. */
 	public static final int BOARD_SIZE = 7;
+
+	/** Amount of total spaces on the Board. */
+	public static final int BOARD_LENGTH = BOARD_SIZE * BOARD_SIZE;
+
+	/** The index of the square at the centre of the Board */
 	public static final int CENTER = (BOARD_SIZE * BOARD_SIZE - 1) / 2;
+
+	/**
+	 * All of the possible colours of balls on the grid. Also contains EMPTY, which
+	 * represents an empty space on the grid.
+	 */
 	public static final COLOUR[] AVAILABLE_COLOURS = COLOUR.values();
-	public static final String BALL_STRING = String.valueOf((char) 250);
 
 	public static final String BOARD_PADDING_LEFT = "%-6s|";
 	public static final String BOARD_PADDING_RIGHT = "%6s";
@@ -53,17 +95,30 @@ public class Board {
 			+ "        |   |   |   |   |   |   |" + System.lineSeparator() + "        14  15  16  17  18  19  20"
 			+ System.lineSeparator();
 
+	/** The grid representing the squares of the Board. */
 	public COLOUR[] grid = new COLOUR[BOARD_SIZE * BOARD_SIZE];
+
+	/** A list of the next possible moves that can be played on the current Board */
 	private List<Move> possibleNextMoves = new ArrayList<Move>();
 
+	/** A list of COLOURs representing the balls won by player one. */
 	public List<COLOUR> p1Balls = new ArrayList<COLOUR>();
+
+	/** A list of COLOURs representing the balls won by player two. */
 	public List<COLOUR> p2Balls = new ArrayList<COLOUR>();
+
+	/** Indicates who's turn it is. When it's true, it's the first player's turn */
 	public boolean firstPlayerTurn = true;
+
+	/** The amount of balls of the same colour to equal a single point. */
 	public static int BALLS_PER_POINT = 3;
 
 	// Public methods and constructors
 	// ----------------------------------------------------------------
 
+	/**
+	 * Instantiates a new board and generates a random valid starting grid.
+	 */
 	public Board() {
 		while (true) {
 			generateBoard();
@@ -73,6 +128,11 @@ public class Board {
 		}
 	}
 
+	/**
+	 * Instantiates a new board and assigns the values of boardValues to the grid.
+	 *
+	 * @param boardValues: the values of the grid
+	 */
 	public Board(int[] boardValues) {
 		assert boardValues.length == grid.length;
 		assert boardValues[CENTER] == 0;
@@ -86,8 +146,18 @@ public class Board {
 		calculateNextPossibleMoves();
 	}
 
-	// constructor so deepCopy() is facilitated
-	// does not calculate the next moves since it is a copy of the board currently
+	/**
+	 * Instantiates a new board and clones the passed arguments to assign them to
+	 * its own global variables. This constructor only used by deepCopy(). This
+	 * constructor does not calculate the next moves since it is a copy of the
+	 * current Board.
+	 *
+	 * @param grid:            the grid
+	 * @param nextMoves:       the next possible moves
+	 * @param p1Balls:         p1 balls
+	 * @param p2Balls:         p2 balls
+	 * @param firstPlayerTurn: whether it's currently the first player's turn
+	 */
 	// calculating the moves
 	public Board(COLOUR[] grid, List<Move> nextMoves, List<COLOUR> p1Balls, List<COLOUR> p2Balls,
 			boolean firstPlayerTurn) {
@@ -98,8 +168,12 @@ public class Board {
 		this.firstPlayerTurn = firstPlayerTurn;
 	}
 
-	// before makeMove always call isValidMove
-	// Board needs to store the balls in order to efficiently implement min max
+	/**
+	 * Play the passed move on the current Board. isValidMove() should be called
+	 * before calling this method
+	 *
+	 * @param move: the move to be played on the Board.
+	 */
 	public void makeMove(int[] move) {
 		// search for calculated legal move and copy it's grid
 		// recalculate next moves
@@ -122,6 +196,12 @@ public class Board {
 		calculateNextPossibleMoves();
 	}
 
+	/**
+	 * Checks if the passed move is a valid move.
+	 *
+	 * @param move: the move to be tested
+	 * @return true if move is valid, else false
+	 */
 	public boolean isValidMove(int[] move) {
 		if (findMove(move) == null) {
 			return false;
@@ -129,10 +209,23 @@ public class Board {
 		return true;
 	}
 
+	/**
+	 * Returns a List containing the calculated next possible moves for this Board.
+	 *
+	 * @return List<Move> containing Moves that can be played on the current Board
+	 */
 	public List<Move> getPossibleMoves() {
 		return possibleNextMoves;
 	}
 
+	/**
+	 * Checks whether the current grid on the Board has at least two balls of the
+	 * same COLOUR, which are not COLOUR.EMPTY, and are adjacent to each other
+	 * horizontally or vertically.
+	 *
+	 * @return true if the current grid has at least 2 spaces adjacent to each other
+	 *         which have the same COLOUR, and that said COLOUR is not COLOUR.EMPTY
+	 */
 	public boolean boardHasNeighbours() {
 		for (int i = 0; i < grid.length; i++) {
 			if (i == CENTER) {
@@ -145,6 +238,12 @@ public class Board {
 		return false;
 	}
 
+	/**
+	 * Checks whether there are any moves left for the current Board by counting the
+	 * amount of possible moves.
+	 *
+	 * @return true if the amount of possibleNextMoves is 0, else false
+	 */
 	public boolean noMovesLeft() {
 		if (possibleNextMoves.size() == 0) {
 			return true;
@@ -152,10 +251,20 @@ public class Board {
 		return false;
 	}
 
+	/**
+	 * Makes a deep copy of this board and returns the instance.
+	 *
+	 * @return Board which is a deep copy of this Board.
+	 */
 	public Board deepCopy() {
 		return new Board(grid, possibleNextMoves, p1Balls, p2Balls, firstPlayerTurn);
 	}
 
+	/**
+	 * Converts the grids of the board to a readable form.
+	 *
+	 * @return the String representation of this Board
+	 */
 	public String toString() {
 		String board = BOARD_SEPERATOR + System.lineSeparator() + BOARD_TOP;
 		for (int y = 0; y < BOARD_SIZE; y++) {
@@ -170,18 +279,12 @@ public class Board {
 		return board;
 	}
 
-	public String toCommunicationString() {
-		String board = "";
-		for (int i = 0; i < grid.length; i++) {
-			board += grid[i].getValue();
-			if (i == grid.length - 1) {
-				continue;
-			}
-			board += Communications.DELIM;
-		}
-		return board;
-	}
-	
+	/**
+	 * Return the passed move as Integer array as a human readable string.
+	 *
+	 * @param move: the move as an Integer array
+	 * @return String representation of the Integer array representation of a move
+	 */
 	public static String moveToReadableString(int[] move) {
 		String returnString = "";
 		for (int m : move) {
@@ -190,6 +293,16 @@ public class Board {
 		return returnString;
 	}
 
+	/**
+	 * Count the amount of points of a given player. The given player is indicated
+	 * through the passed boolean.
+	 *
+	 * @param playerOne: true if the function should return the amount of points for
+	 *                   the first player, else it will return the amount of points
+	 *                   for the second player.
+	 * @return int, the amount of points currently in possession for the given
+	 *         player.
+	 */
 	public int countPoints(boolean playerOne) {
 		List<COLOUR> balls = playerOne ? p1Balls : p2Balls;
 
@@ -210,6 +323,15 @@ public class Board {
 	// Private methods
 	// -------------------------------------------------------------------------------
 
+	/**
+	 * Finds the Move inside of the List possibleNextMoves containing the passed
+	 * Integer array as its internal variable Move.move.
+	 *
+	 * @param move: the move to be searched for as an Integer array
+	 * @return Move corresponding to the move passed as a parameter. If no Move in
+	 *         possibleNextMoves corresponds to the passed parameter, this will
+	 *         return null.
+	 */
 	private Move findMove(int[] move) {
 		for (Move m : possibleNextMoves) {
 			if (Arrays.equals(m.move, move)) {
@@ -219,6 +341,9 @@ public class Board {
 		return null;
 	}
 
+	/**
+	 * Generates board and initializes the grid of this Board.
+	 */
 	private void generateBoard() {
 		// create list with 8 items per colour
 		List<COLOUR> randomList = new ArrayList<COLOUR>();
@@ -276,8 +401,16 @@ public class Board {
 		}
 	}
 
-	// return next index after given index that is not equal to the given COLOUR
-	// and
+	/**
+	 * Finds the next index in grid, for which the COLOUR is not equal to the COLOUR
+	 * of the passed index and the COLOUR is not COLOUR.EMPTY, or adjacent to the
+	 * same COLOUR horizontally or vertically.
+	 *
+	 * @param index: the index from which to start searching ahead.
+	 * @return index of the next space in the grid which is not equal to the COLOUR
+	 *         of the passed index, is not COLOUR.EMPTY, or adjacent to its own
+	 *         COLOUR
+	 */
 	// does not have neighbours if given COLOUR would be on index
 	private int findNextValidIndex(int index) {
 		int modIndex = index;
@@ -292,8 +425,16 @@ public class Board {
 		return modIndex;
 	}
 
-	// returns -1 if no same colour neighbours
-	// else returns one of the indexes of the same colour neighbours
+	/**
+	 * Returns a positive index of grid if there are any spaces adjacent to the
+	 * passed index which are equal to the passed COLOUR. If there are no
+	 * neighbours, return -1.
+	 *
+	 * @param index:  the index of the space to check for adjacent spaces
+	 * @param colour: the COLOUR for which to compare
+	 * @return returns -1 if no same colour neighbours, else returns index of space
+	 *         which has same COLOUR as passed index
+	 */
 	private int getIdenticalNeighbour(int index, COLOUR colour) {
 		if (grid[index].equals(COLOUR.EMPTY)) {
 			return -1;
@@ -327,12 +468,30 @@ public class Board {
 		return -1;
 	}
 
-	// returns -1 if no same colour neighbours
+	/**
+	 * Returns a positive index of grid if there are any spaces adjacent to the
+	 * passed index which are equal to the COLOUR of the passed index. If there are
+	 * no neighbours, return -1.
+	 *
+	 * @param index: the index of the space to check for adjacent spaces
+	 * @return returns -1 if no same colour neighbours, else returns index of space
+	 *         which has same COLOUR as passed index
+	 */
 	// else returns one of the indexes of the same colour neighbours
 	private int getIdenticalNeighbour(int index) {
 		return getIdenticalNeighbour(index, grid[index]);
 	}
 
+	/**
+	 * Checks whether the passed index is equals to the passed COLOUR.
+	 *
+	 * @param colour:         the COLOUR to compare with the COLOUR of
+	 *                        grid[neighbourIndex]
+	 * @param neighbourIndex: the index of the square to be compared against the
+	 *                        passed colour.
+	 * @return true the passed COLOUR and the COLOUR of grid[neighbourIndex] are the
+	 *         same, else false.
+	 */
 	private boolean hasIdenticalNeighbour(COLOUR colour, int neighbourIndex) {
 		if (grid[neighbourIndex].equals(colour)) {
 			return true;
@@ -340,15 +499,17 @@ public class Board {
 		return false;
 	}
 
-	// before this method is called, all of the possible moves should have been
-	// calculated
-	// checkValidMove = true if player makes single move
-	// and
-	// checkValidMove = true if player makes double move and this method is called
-	// for the second time
-	// returns
-	// see protocol on gitlab to see move mapping
-	private List<COLOUR> tryMove(int move, boolean checkValidMove) {
+	/**
+	 * Physically move the COLOURs on the grid. This method should only be called by
+	 * calculateMoves(). This method is only used to calculate the next moves, not
+	 * to have a player actually make a move.
+	 *
+	 * @param move: the move to try to make on the current Board
+	 * @return a List containing all of the balls/COLOURs which are removed from the
+	 *         Board after making the passed move. Will return null if the move was
+	 *         invalid.
+	 */
+	private List<COLOUR> tryMove(int move) {
 		if (!hasEmpty(move)) {
 			return null;
 		}
@@ -363,145 +524,19 @@ public class Board {
 			moveVertical(false, move - BOARD_SIZE * 3);
 		}
 
-		if (!boardHasNeighbours() && checkValidMove) {
+		if (!boardHasNeighbours()) {
 			return null;
 		}
 
 		return removeBalls();
 	}
 
-	private boolean hasEmpty(int move) {
-
-		// check if move is with row or column
-		// check if empty spot in row or column
-		// N between 0 and 6: push row N to left
-		// N between 7 and 13: push row (N-7) to right
-		// N between 14 and 20: push column (N-14) upwards
-		// N between 21 and 27: push column (N-21) downwards
-
-		if (move < 14) {
-			// check horizontal
-			if (horizontalHasEmpty(move)) {
-				return true;
-			}
-		} else if (move < 28) {
-			// check vertical
-			if (verticalHasEmpty(move)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	private void moveLine(int start, int direction, int step) {
-		int counter = 0;
-		while (counter != BOARD_SIZE) {
-			int index = start + (direction * counter * step);
-			if (!grid[index].equals(COLOUR.EMPTY)) {
-				int moveCounter = 1;
-				while (true) {
-					int previous = index - (direction * moveCounter * step);
-					int current = index - (direction * (moveCounter - 1) * step);
-					if (previous < 0 || previous > grid.length - 1 || previous == start - direction) {
-						break;
-					}
-					if (!grid[previous].equals(COLOUR.EMPTY)) {
-						break;
-					}
-					grid[previous] = grid[current];
-					grid[current] = COLOUR.EMPTY;
-					moveCounter++;
-				}
-			}
-			counter++;
-		}
-	}
-
-	private void moveHorizontal(boolean moveLeft, int n) {
-		// int counter = 0;
-		int start = moveLeft ? n * BOARD_SIZE : n * BOARD_SIZE + (BOARD_SIZE - 1);
-		int direction = moveLeft ? 1 : -1;
-		int step = 1;
-
-		moveLine(start, direction, step);
-	}
-
-	private void moveVertical(boolean moveUp, int n) {
-		// int counter = 0;
-		int start = moveUp ? n : n + (BOARD_SIZE * (BOARD_SIZE - 1));
-		int direction = moveUp ? 1 : -1;
-		int step = BOARD_SIZE;
-
-		moveLine(start, direction, step);
-	}
-
-	private boolean horizontalHasEmpty(int n) {
-		int modN = n;
-		if (modN > BOARD_SIZE - 1) {
-			modN -= BOARD_SIZE;
-		}
-		COLOUR[] column = Arrays.copyOfRange(grid, modN * BOARD_SIZE, modN * BOARD_SIZE + BOARD_SIZE);
-		for (COLOUR c : column) {
-			if (c == COLOUR.EMPTY) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private boolean verticalHasEmpty(int n) {
-		int modN = n;
-		if (modN > 20) {
-			modN -= BOARD_SIZE;
-		}
-		for (int i = 0; i < BOARD_SIZE; i++) {
-			if (grid[(modN - 2 * BOARD_SIZE) + i * BOARD_SIZE].equals(COLOUR.EMPTY)) {
-				return true;
-			}
-		}
-		return false;
-	}
-
-	private void calculateNextPossibleMoves() {
-		List<Move> nextLegalMoves = new ArrayList<Move>();
-
-		List<Board> nextSingleMoveBoards = new ArrayList<Board>();
-		// generate all single moves
-		for (int move = 0; move < BOARD_SIZE * 4; move++) {
-			Board nextBoard = deepCopy();
-			nextSingleMoveBoards.add(nextBoard);
-			List<COLOUR> wonBalls = nextBoard.tryMove(move, true);
-			if (wonBalls == null) {
-				continue;
-			}
-			nextLegalMoves.add(new Move(nextBoard, move, wonBalls));
-		}
-
-		// if single move possible only return single moves
-		if (nextLegalMoves.size() > 0) {
-			possibleNextMoves = nextLegalMoves;
-			return;
-		}
-
-		// check for legal double moves
-		for (int firstMove = 0; firstMove < nextSingleMoveBoards.size(); firstMove++) {
-			{
-				for (int secondMove = 0; secondMove < BOARD_SIZE * 4; secondMove++) {
-					Board nextNextBoard = nextSingleMoveBoards.get(firstMove).deepCopy();
-					List<COLOUR> wonBalls = nextNextBoard.tryMove(secondMove, true);
-					if (wonBalls == null) {
-						continue;
-					}
-					nextLegalMoves.add(new Move(nextNextBoard, new int[] { firstMove, secondMove }, wonBalls));
-				}
-			}
-		}
-
-		possibleNextMoves = nextLegalMoves;
-	}
-
-	// before this is called, a move should have been made on the board
+	/**
+	 * Returns the balls currently adjacent to each other with the same COLOUR and
+	 * replaces their space in grid with COLOUR.EMPTY.
+	 *
+	 * @return the balls which have been removed from the grid.
+	 */
 	private List<COLOUR> removeBalls() {
 		List<COLOUR> connectedBalls = new ArrayList<COLOUR>();
 		List<Integer> connectedBallsIndex = new ArrayList<Integer>();
@@ -544,6 +579,186 @@ public class Board {
 		}
 
 		return connectedBalls;
+	}
+
+	/**
+	 * Checks if the given row or column has an empty space.
+	 *
+	 * @param move: the column or row to check: 0 to 13 checks columns, 14 to 27
+	 *              checks rows
+	 * @return true if there is an empty space in either the row or column checked.
+	 */
+	private boolean hasEmpty(int move) {
+
+		// check if move is with row or column
+		// check if empty spot in row or column
+		// N between 0 and 6: push row N to left
+		// N between 7 and 13: push row (N-7) to right
+		// N between 14 and 20: push column (N-14) upwards
+		// N between 21 and 27: push column (N-21) downwards
+
+		if (move < BOARD_SIZE * 2) {
+			// check horizontal
+			if (horizontalHasEmpty(move)) {
+				return true;
+			}
+		} else if (move < BOARD_SIZE * 4) {
+			// check vertical
+			if (verticalHasEmpty(move)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Check if horizontal row has empty space.
+	 *
+	 * @param n: the index of the move corresponding to the row
+	 * @return true if row in grid contains at least one space with COLOUR.EMPTY.
+	 */
+	private boolean horizontalHasEmpty(int n) {
+		int modN = n;
+		if (modN > BOARD_SIZE - 1) {
+			modN -= BOARD_SIZE;
+		}
+		COLOUR[] column = Arrays.copyOfRange(grid, modN * BOARD_SIZE, modN * BOARD_SIZE + BOARD_SIZE);
+		for (COLOUR c : column) {
+			if (c == COLOUR.EMPTY) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Check if vertical column has empty space.
+	 *
+	 * @param n: the index of the move corresponding to the column
+	 * @return true if column in grid contains at least one space with COLOUR.EMPTY.
+	 */
+	private boolean verticalHasEmpty(int n) {
+		int modN = n;
+		if (modN > 20) {
+			modN -= BOARD_SIZE;
+		}
+		for (int i = 0; i < BOARD_SIZE; i++) {
+			if (grid[(modN - 2 * BOARD_SIZE) + i * BOARD_SIZE].equals(COLOUR.EMPTY)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Shift each space with a non empty COLOUR on the given row or column into the
+	 * given direction.
+	 *
+	 * @param start     the index from which to start shifting spaces
+	 * @param direction the direction towards where the spaces are shifting,
+	 *                  positive for moving spaces to the right and down and
+	 *                  negative for left and up.
+	 * @param step      the step between the indices which are shifted: should be 1
+	 *                  for horizontal shifts and BOARD_SIZE for a vertical shift.
+	 */
+	private void moveLine(int start, int direction, int step) {
+		int counter = 0;
+		while (counter != BOARD_SIZE) {
+			int index = start + (direction * counter * step);
+			if (!grid[index].equals(COLOUR.EMPTY)) {
+				int moveCounter = 1;
+				while (true) {
+					int previous = index - (direction * moveCounter * step);
+					int current = index - (direction * (moveCounter - 1) * step);
+					if (previous < 0 || previous > grid.length - 1 || previous == start - direction) {
+						break;
+					}
+					if (!grid[previous].equals(COLOUR.EMPTY)) {
+						break;
+					}
+					grid[previous] = grid[current];
+					grid[current] = COLOUR.EMPTY;
+					moveCounter++;
+				}
+			}
+			counter++;
+		}
+	}
+
+	/**
+	 * Move horizontal line of grid. Calls moveLine() to shift the COLOURs of a row
+	 * to the left or right depending on the passed parameter.
+	 *
+	 * @param moveLeft: true if the row should be shifted to the left.
+	 * @param n:        the index of the move to be played, see also the move
+	 *                  protocols of Collecto.
+	 */
+	private void moveHorizontal(boolean moveLeft, int n) {
+		// int counter = 0;
+		int start = moveLeft ? n * BOARD_SIZE : n * BOARD_SIZE + (BOARD_SIZE - 1);
+		int direction = moveLeft ? 1 : -1;
+		int step = 1;
+
+		moveLine(start, direction, step);
+	}
+
+	/**
+	 * Move vertical line of grid. Calls moveLine() to shift the COLOURs of a column
+	 * to up or down depending on the passed parameter.
+	 *
+	 * @param moveLeft: true if the column should be shifted upwards.
+	 * @param n:        the index of the move to be played, see also the move
+	 *                  protocols of Collecto.
+	 */
+	private void moveVertical(boolean moveUp, int n) {
+		// int counter = 0;
+		int start = moveUp ? n : n + (BOARD_SIZE * (BOARD_SIZE - 1));
+		int direction = moveUp ? 1 : -1;
+		int step = BOARD_SIZE;
+
+		moveLine(start, direction, step);
+	}
+
+	/**
+	 * Calculate next possible moves and add them to possibleNextMoves();
+	 */
+	private void calculateNextPossibleMoves() {
+		List<Move> nextLegalMoves = new ArrayList<Move>();
+
+		List<Board> nextSingleMoveBoards = new ArrayList<Board>();
+		// generate all single moves
+		for (int move = 0; move < BOARD_SIZE * 4; move++) {
+			Board nextBoard = deepCopy();
+			nextSingleMoveBoards.add(nextBoard);
+			List<COLOUR> wonBalls = nextBoard.tryMove(move);
+			if (wonBalls == null) {
+				continue;
+			}
+			nextLegalMoves.add(new Move(nextBoard, move, wonBalls));
+		}
+
+		// if single move possible only return single moves
+		if (nextLegalMoves.size() > 0) {
+			possibleNextMoves = nextLegalMoves;
+			return;
+		}
+
+		// check for legal double moves
+		for (int firstMove = 0; firstMove < nextSingleMoveBoards.size(); firstMove++) {
+			{
+				for (int secondMove = 0; secondMove < BOARD_SIZE * 4; secondMove++) {
+					Board nextNextBoard = nextSingleMoveBoards.get(firstMove).deepCopy();
+					List<COLOUR> wonBalls = nextNextBoard.tryMove(secondMove);
+					if (wonBalls == null) {
+						continue;
+					}
+					nextLegalMoves.add(new Move(nextNextBoard, new int[] { firstMove, secondMove }, wonBalls));
+				}
+			}
+		}
+
+		possibleNextMoves = nextLegalMoves;
 	}
 
 	// DEBUG METHODS

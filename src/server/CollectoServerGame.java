@@ -7,14 +7,48 @@ import java.util.List;
 import game.Board;
 import game.Collecto;
 import util.CollectoInterface;
+import util.CollectoNetworker;
 import util.Communications;
 
+/**
+ * The Class CollectoServerGame.
+ */
 public class CollectoServerGame extends Collecto {
 
+	/**
+	 * Enum Condition to more easily communicate the end game condition
+	 */
+	public enum Condition {
+
+		/** The victory player one. */
+		VICTORY_PLAYER_ONE,
+
+		/** The victory player two. */
+		VICTORY_PLAYER_TWO,
+
+		/** The disconnect. */
+		DISCONNECT,
+
+		/** The draw. */
+		DRAW
+	}
+
+	/**
+	 * The client handlers assigned to this game in the order of player 1 and player
+	 * 2.
+	 */
 	private List<CollectoClientHandler> playingClients = new ArrayList<CollectoClientHandler>();
 
+	/** The game id, which is used to distinguish this game in the console. */
 	private int gameId;
 
+	/**
+	 * Instantiates a new CollectoServerGame.
+	 *
+	 * @param gameId: the id to assign to gameId.
+	 * @param p1:     the CollectoClientHandler assigned as player 1.
+	 * @param p2:     the CollectoClientHandler assigned as player 2.
+	 */
 	public CollectoServerGame(int gameId, CollectoClientHandler p1, CollectoClientHandler p2) {
 		this.gameId = gameId;
 
@@ -24,21 +58,43 @@ public class CollectoServerGame extends Collecto {
 		board = new Board();
 	}
 
+	/**
+	 * Removes the passed client handler from the List playingClients and calls the
+	 * gameOver() method with a DISCONNECT argument.
+	 *
+	 * @param client: the client handler associated with the disconnected client.
+	 */
 	synchronized public void disconnectClient(CollectoClientHandler client) {
 		showMessage("Client " + client.getName() + " disconnected");
 		playingClients.remove(client);
 		gameOver(Condition.DISCONNECT);
 	}
 
+	/**
+	 * Starts a new game by calling the NEWGAME implementation of both client
+	 * handlers, passing the order and name of the players and the state of the grid
+	 * of the Board.
+	 */
 	synchronized public void newGame() {
 
 		CollectoClientHandler playerOne = playingClients.get(0);
 		CollectoClientHandler playerTwo = playingClients.get(1);
 
-		playerOne.startGame(board.toCommunicationString(), playerOne.getName(), playerTwo.getName(), this);
-		playerTwo.startGame(board.toCommunicationString(), playerOne.getName(), playerTwo.getName(), this);
+		playerOne.newGame(CollectoNetworker.toCommunicationString(board), playerOne.getName(), playerTwo.getName(),
+				this);
+		playerTwo.newGame(CollectoNetworker.toCommunicationString(board), playerOne.getName(), playerTwo.getName(),
+				this);
 	}
-	
+
+	/**
+	 * Attempts to play the move passed in the parameter move on the board. If
+	 * succesful will call MOVE protocol for both client handlers and check whether
+	 * game is over. If a move is played out of turn or is invalid, the ERROR
+	 * implementation of the client handler who sent the move will be called.
+	 *
+	 * @param move:   the move sent by the client as an Integer array.
+	 * @param player: the client handler who requested the move.
+	 */
 	synchronized public void receiveMove(int[] move, CollectoClientHandler player) {
 		try {
 			if (playingClients.get(board.firstPlayerTurn ? 0 : 1).equals(player)) {
@@ -64,6 +120,13 @@ public class CollectoServerGame extends Collecto {
 		}
 	}
 
+	/**
+	 * Ends the game by calling the appropriate protocol implementations to the
+	 * client handlers, depending on the condition passed as a parameter. This
+	 * method results in all references to this game to be cleared.
+	 *
+	 * @param condition: the condition for ending the game as a Condition ENUM.
+	 */
 	synchronized public void gameOver(Condition condition) {
 
 		if (condition.equals(Condition.DISCONNECT)) {
@@ -104,6 +167,11 @@ public class CollectoServerGame extends Collecto {
 		showMessage("game ended");
 	}
 
+	/**
+	 * Count the points of both players and call the gameOver() method with the
+	 * appropriate Condition based on the amount of points per player.
+	 *
+	 */
 	public void getWinner() {
 
 		int playerOnePoints = board.countPoints(true);
@@ -122,7 +190,13 @@ public class CollectoServerGame extends Collecto {
 			gameOver(Condition.VICTORY_PLAYER_TWO);
 		}
 	}
-	
+
+	/**
+	 * Show message on the console, prepended by the id of this game in order to
+	 * distinguish it in the console.
+	 *
+	 * @param msg: the message to be printed to the console.
+	 */
 	private void showMessage(String msg) {
 		CollectoInterface.showMessage("Game " + gameId + ": " + msg);
 	}

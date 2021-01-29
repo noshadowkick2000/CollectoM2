@@ -3,11 +3,22 @@ package client;
 import game.Board;
 import util.CollectoInterface;
 
+/**
+ * The Class HumanPlayer.
+ */
 public class HumanPlayer implements CollectoClientPlayer {
 
+	/** Usage format for inputting moves to the console. */
 	static private final String MOVE_FORMAT = "Select move to play, format is <firstMove>[second move]";
-	static private final String YOUR_MOVE = "It's your move";
 
+	/**
+	 * Return the move to be played by the HumanPlayer on the passed Board. This
+	 * method will block while waiting for the user to input the move. Method will
+	 * not return unless valid move has been inputed.
+	 *
+	 * @param board: the Board on which the move is to be played
+	 * @return an Integer array of size 1 or 2 containing the move to be played
+	 */
 	@Override
 	public int[] getMove(Board board) {
 
@@ -15,7 +26,7 @@ public class HumanPlayer implements CollectoClientPlayer {
 
 		CollectoInterface.showBoard(board);
 
-		CollectoInterface.showMessage(YOUR_MOVE);
+		CollectoInterface.showMessage("It's your move");
 
 		String[] args;
 		int[] move;
