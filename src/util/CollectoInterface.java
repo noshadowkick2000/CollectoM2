@@ -1,3 +1,9 @@
+/*
+ * Collecto Network System
+ * University of Twente
+ * Tim Yeung s2085615
+ * January 2021
+ */
 package util;
 
 import java.util.Scanner;

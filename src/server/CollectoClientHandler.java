@@ -1,3 +1,9 @@
+/*
+ * Collecto Network System
+ * University of Twente
+ * Tim Yeung s2085615
+ * January 2021
+ */
 package server;
 
 import java.io.BufferedReader;
@@ -63,7 +69,6 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 	 * @ensures in != null, out != null, server != null.
 	 * @param sock:        socket connected to the client
 	 * @param server:      the server associated with this client handler
-	 * @param description: the description of the server associated with this client
 	 *                     handler
 	 * @throws IOException Signals that an I/O exception has occurred. Generally
 	 *                     indicates client has disconnected.

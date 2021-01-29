@@ -1,3 +1,9 @@
+/*
+ * Collecto Network System
+ * University of Twente
+ * Tim Yeung s2085615
+ * January 2021
+ */
 package server;
 
 import java.io.IOException;
@@ -126,7 +132,8 @@ public class CollectoServer implements Runnable {
 	 *
 	 * @requires client != null, userName != null
 	 * @ensures connectedClients.add(client);
-	 * @param client: the client handler assigned to the client.
+	 * @param client:   the client handler assigned to the client.
+	 * @param userName: user name sent for inspection by the client.
 	 * @return true if user name is unique and client has been added to
 	 *         connectedClients, else false
 	 */

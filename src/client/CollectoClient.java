@@ -1,3 +1,9 @@
+/*
+ * Collecto Network System
+ * University of Twente
+ * Tim Yeung s2085615
+ * January 2021
+ */
 package client;
 
 import java.io.BufferedReader;
@@ -109,9 +115,8 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 
 	/**
 	 * Starts the program and the initialization sequence.
-	 *
-	 * @throws IOException Signals that an I/O exception has occurred. Generally
-	 *                     indicates that the connection has closed.
+	 * 
+	 * @ensures sock.close() before returning.
 	 */
 	public void connectServer() {
 		handleInitialization();
@@ -227,10 +232,12 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 	 * 
 	 * @requires out != nul, clientDescription != null.
 	 * @param clientDescription: the client description.
-	 * @throws IOException               Signals that an I/O exception has occurred.
-	 *                                   Generally indicates that the connection has
-	 *                                   closed.
-	 * @throws InvalidResponseException: the invalid response exception.
+	 * @throws IOException              Signals that an I/O exception has occurred.
+	 *                                  Generally indicates that the connection has
+	 *                                  closed.
+	 * @throws InvalidResponseException Signals that a the server has sent this
+	 *                                  client a message which is not part of the
+	 *                                  known protocols.
 	 */
 	public void hello(String clientDescription) throws IOException, InvalidResponseException {
 		writeMessage(Communications.H + Communications.DELIM + clientDescription);
@@ -259,10 +266,12 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 	 * @param loginName the user name with which to log on to the server.
 	 * @return true if successful and loginName is not an existing name on the
 	 *         server.
-	 * @throws IOException               Signals that an I/O exception has occurred.
-	 *                                   Generally indicates that the connection has
-	 *                                   closed.
-	 * @throws InvalidResponseException: the invalid response exception.
+	 * @throws IOException              Signals that an I/O exception has occurred.
+	 *                                  Generally indicates that the connection has
+	 *                                  closed.
+	 * @throws InvalidResponseException Signals that a the server has sent this
+	 *                                  client a message which is not part of the
+	 *                                  known protocols.
 	 */
 	public boolean login(String loginName) throws IOException, InvalidResponseException {
 		writeMessage(Communications.L + Communications.DELIM + loginName);

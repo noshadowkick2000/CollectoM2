@@ -1,3 +1,9 @@
+/*
+ * Collecto Network System
+ * University of Twente
+ * Tim Yeung s2085615
+ * January 2021
+ */
 package game;
 
 import java.util.ArrayList;
@@ -231,7 +237,7 @@ public class Board {
 	/**
 	 * Returns a List containing the calculated next possible moves for this Board.
 	 *
-	 * @return List<Move> containing Moves that can be played on the current Board
+	 * @return List containing Moves that can be played on the current Board
 	 */
 	public List<Move> getPossibleMoves() {
 		return possibleNextMoves;
