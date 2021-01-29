@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import game.Board;
 import game.COLOUR;
+import util.Communications;
 
 class boardTests {
 
@@ -16,15 +17,17 @@ class boardTests {
 	public static final int[] ENDGAME_EXAMPLE = new int[] { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 3, 0, 0, 5,
 			2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0 };
 	
-	public static final String CORRECT_GRID_EXAMPLE_STRING = "5~3~4~2~5~3~6~4~6~3~4~3~1~2~5~3~2~1~2~6~5~4~1~4~0~4~1~4~5~6~2~1~5~6~2~3~1~5~4~6~5~3~6~3~6~2~1~2~1";
-	public static final int[] CORRECT_GRID_EXAMPLE_LEGAL_MOVES = new int[] { 3, 10, 17, 24 };
-	public static final int[] CORRECT_GRID_EXAMPLE_MOVE_THREE = new int[] { 5, 3, 4, 2, 5, 3, 6, 4, 6, 3, 4, 3, 1, 2,
+	private static final String CORRECT_GRID_EXAMPLE_STRING = "5~3~4~2~5~3~6~4~6~3~4~3~1~2~5~3~2~1~2~6~5~4~1~4~0~4~1~4~5~6~2~1~5~6~2~3~1~5~4~6~5~3~6~3~6~2~1~2~1";
+	private static final int[] CORRECT_GRID_EXAMPLE_LEGAL_MOVES = new int[] { 3, 10, 17, 24 };
+	private static final int[] CORRECT_GRID_EXAMPLE_MOVE_THREE = new int[] { 5, 3, 4, 2, 5, 3, 6, 4, 6, 3, 4, 3, 1, 2,
 			5, 3, 2, 1, 2, 6, 5, 4, 1, 0, 0, 1, 4, 0, 5, 6, 2, 1, 5, 6, 2, 3, 1, 5, 4, 6, 5, 3, 6, 3, 6, 2, 1, 2, 1 };
-	public static final int[] DOUBLE_MOVE_BOARD = new int[] { 6, 3, 5, 3, 4, 3, 1, 5, 2, 4, 5, 2, 1, 2, 2, 4, 6, 4, 6,
+	private static final int[] DOUBLE_MOVE_BOARD = new int[] { 6, 3, 5, 3, 4, 3, 1, 5, 2, 4, 5, 2, 1, 2, 2, 4, 6, 4, 6,
 			3, 5, 1, 2, 5, 0, 3, 1, 2, 4, 6, 1, 6, 2, 5, 6, 6, 1, 5, 3, 1, 4, 1, 5, 3, 4, 6, 3, 2, 4 };
-	public static final int[] SINGLE_MOVE_EXAMPLE = new int[] {3};
-	public static final int[] DOUBLE_MOVE_EXAMPLE = new int[] {17, 6};
-	
+	private static final int[] SINGLE_MOVE_EXAMPLE = new int[] {3};
+	private static final String SINGLE_MOVE_EXAMPLE_PROTOCOL = "MOVE~3";
+	private static final int[] DOUBLE_MOVE_EXAMPLE = new int[] {3, 10};
+	private static final String DOUBLE_MOVE_EXAMPLE_PROTOCOL = "MOVE~3~10";
+
 	@Test
 	void passedArgumentGenerationTest() {
 		board = new Board(CORRECT_GRID_EXAMPLE);
@@ -103,7 +106,7 @@ class boardTests {
 	@Test
 	void doubleMoveTest() {
 		board = new Board(DOUBLE_MOVE_BOARD);
-		board.makeMove(DOUBLE_MOVE_EXAMPLE);
+		board.makeMove(new int[] { 17, 6 });
 		assertNotEquals(0, board.p1Balls.size());
 	}
 
@@ -134,5 +137,23 @@ class boardTests {
 	void communicationTest() {
 		board = new Board(CORRECT_GRID_EXAMPLE);
 		assertEquals(CORRECT_GRID_EXAMPLE_STRING, board.toCommunicationString());
+	}
+	
+	@Test
+	void moveProtocolTest() {
+		String protocolMove = Board.moveIntToString(SINGLE_MOVE_EXAMPLE);
+		assertEquals(SINGLE_MOVE_EXAMPLE_PROTOCOL, protocolMove);
+		
+		protocolMove = Board.moveIntToString(DOUBLE_MOVE_EXAMPLE);
+		assertEquals(DOUBLE_MOVE_EXAMPLE_PROTOCOL, protocolMove);
+	}
+	
+	@Test
+	void moveArrayTest() {
+		int[] arrayMove = Board.moveStringToInt(SINGLE_MOVE_EXAMPLE_PROTOCOL.split(Communications.DELIM));
+		assertArrayEquals(SINGLE_MOVE_EXAMPLE, arrayMove);
+		
+		arrayMove = Board.moveStringToInt(DOUBLE_MOVE_EXAMPLE_PROTOCOL.split(Communications.DELIM));
+		assertArrayEquals(DOUBLE_MOVE_EXAMPLE, arrayMove);
 	}
 }

@@ -11,27 +11,11 @@ public class CollectoInterface {
 	public static final String INPUT_INDICATOR = ": ";
 	public static final String TAB = "    ";
 	private static final String SHOW_MOVES = "Possible moves are: ";
-
-	public static Scanner scanner = new Scanner(System.in);
-
-	private static boolean consoleEnabled = true;
-
-	public static void enableConsole() {
-		consoleEnabled = true;
-	}
-
-	public static void disableConsole() {
-		consoleEnabled = false;
-	}
 	
-	public static void showDebugMessage(String msg) {
-		System.out.println(msg);
-	}
-
+	public static Scanner scanner = new Scanner(System.in);
+	
 	public static void showMessage(String msg) {
-		if (consoleEnabled) {
-			System.out.println(CONSOLE_INDICATOR + msg);
-		}
+		System.out.println(CONSOLE_INDICATOR + msg);
 	}
 
 	public static void showInput() {
@@ -62,7 +46,7 @@ public class CollectoInterface {
 		showInput();
 		return scanner.nextLine();
 	}
-
+	
 	public static void showPossibleMoves(Board board) {
 		String moves = System.lineSeparator();
 		for (Move m : board.getPossibleMoves()) {
@@ -70,7 +54,7 @@ public class CollectoInterface {
 		}
 		CollectoInterface.showMessage(SHOW_MOVES + moves);
 	}
-
+	
 	public static void showBoard(Board board) {
 		CollectoInterface.showMessage(System.lineSeparator() + board.toString());
 	}

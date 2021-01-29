@@ -181,6 +181,14 @@ public class Board {
 		}
 		return board;
 	}
+
+	public static String moveIntToString(int[] move) {
+		String moveMessage = Communications.M;
+		for (int m : move) {
+			moveMessage += Communications.DELIM + m;
+		}
+		return moveMessage;
+	}
 	
 	public static String moveToReadableString(int[] move) {
 		String returnString = "";
@@ -188,6 +196,20 @@ public class Board {
 			returnString += m + " ";
 		}
 		return returnString;
+	}
+
+	// for convenience, this string array includes the MOVE at the start of the
+	// protocol
+	public static int[] moveStringToInt(String[] move) {
+
+		if (move.length == 3) {
+			// make double move
+			return new int[] { Integer.parseInt(move[1]), Integer.parseInt(move[2]) };
+		} else if (move.length == 2) {
+			// make single move
+			return new int[] { Integer.parseInt(move[1]) };
+		}
+		return null;
 	}
 
 	public int countPoints(boolean playerOne) {

@@ -4,21 +4,18 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
 import util.CollectoInterface;
 import util.Communications;
 
-public class CollectoServer implements Runnable {
+public class CollectoServer {
 
-	public List<CollectoClientHandler> connectedClients = new ArrayList<CollectoClientHandler>();
-	public List<CollectoClientHandler> queuedClients = new ArrayList<CollectoClientHandler>();
+	private List<CollectoClientHandler> connectedClients = new ArrayList<CollectoClientHandler>();
+	private List<CollectoClientHandler> queuedClients = new ArrayList<CollectoClientHandler>();
 
 	private int newId = 0;
-
-	public ServerSocket ss;
 
 	// Constructors and Public methods
 	// ----------------------------------------------------------------------------
@@ -37,38 +34,21 @@ public class CollectoServer implements Runnable {
 		String description = CollectoInterface.requestInput("Enter the server description");
 
 		try {
-			createServerSocket(port);
-			acceptNewClients(description);
+			ServerSocket ss = new ServerSocket(port, 0, InetAddress.getLocalHost());
+			CollectoInterface.showMessage(
+					"Server created on port " + port + " with ip " + InetAddress.getLocalHost().getHostAddress());
+
+			while (System.in.available() == 0) {
+				Socket sock = ss.accept();
+				CollectoInterface.showMessage("Client connected");
+				(new Thread((new CollectoClientHandler(sock, this, description)))).start();
+			}
+
+			ss.close();
 		} catch (IOException e) {
+			System.out.println("Error creating server connections");
 			System.exit(-1);
 		}
-	}
-
-	public void createServerSocket(int port) throws UnknownHostException, IOException {
-
-		ss = new ServerSocket(port, 0, InetAddress.getLocalHost());
-		CollectoInterface.showMessage(
-				"Server created on port " + port + " with ip " + InetAddress.getLocalHost().getHostAddress());
-
-	}
-
-	public void acceptNewClients(String description) throws IOException {
-		(new Thread(this)).start();
-
-		while (true) {
-			createNewHandler(description);
-		}
-	}
-
-	synchronized public void createNewHandler(String description) throws IOException {
-		Socket sock = ss.accept();
-		CollectoInterface.showMessage("Client connected");
-		(new Thread((new CollectoClientHandler(sock, this, description)))).start();
-	}
-
-	public void run() {
-		CollectoInterface.requestInput("Press enter to close the server");
-		exit();
 	}
 
 	// only called once name has been established
@@ -113,16 +93,6 @@ public class CollectoServer implements Runnable {
 			users += Communications.DELIM;
 		}
 		return users;
-	}
-
-	public void exit() {
-		try {
-			CollectoInterface.showMessage("Shutting down");
-			ss.close();
-		} catch (IOException e) {
-			CollectoInterface.showMessage("Error closing server socket");
-		}
-		System.exit(0);
 	}
 
 	// Private methods
