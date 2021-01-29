@@ -59,8 +59,7 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 
 	/**
 	 * Instantiates a new collecto client handler.
-	 * 
-	 * @ensures in != null, out != null, server != null.
+	 *
 	 * @param sock:        socket connected to the client
 	 * @param server:      the server associated with this client handler
 	 * @param description: the description of the server associated with this client
@@ -96,10 +95,7 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 	/**
 	 * Sends the NEWGAME protocol to the client containing the state of the board
 	 * and the player order and names.
-	 * 
-	 * @requires state != State.IN_GAME, board != null, p1 != null, p2 != null, game
-	 *           != null.
-	 * @ensures state = State.IN_GAME, this.game = game.
+	 *
 	 * @param board: the Board on which will be played.
 	 * @param p1     the user name of player 1.
 	 * @param p2     the user name of player 2.
@@ -121,7 +117,6 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 	 * invalid move has been sent to this client handler or when a move has been
 	 * sent while it is not tis client handler's turn in the game.
 	 *
-	 * @requires description != null.
 	 * @param description: the description of the error
 	 * @throws IOException Signals that an I/O exception has occurred. Generally
 	 *                     indicates client has disconnected.
@@ -147,8 +142,6 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 	/**
 	 * Reads the input from the socket input untill the socket closes. This method
 	 * will block untill a new message has been sent to this client handler.
-	 * 
-	 * @requires in != null, out != null.
 	 */
 	private void handleInput() {
 		String input;
@@ -166,7 +159,6 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 	 * state of the client handler. If it is still uninitialized, it will only read
 	 * HELLO and LOGIN protocols, else it will only read the other protocols.
 	 *
-	 * @requires input != null.
 	 * @param input: the message received from the client.
 	 * @throws IOException Signals that an I/O exception has occurred. Generally
 	 *                     indicates client has disconnected.
@@ -186,7 +178,6 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 	 * Reads the passed argument and replies to protocol messages of HELLO and
 	 * LOGIN.
 	 *
-	 * @requires args != null, args.length > 1.
 	 * @param args: the message received from the client split by the
 	 *              Communication.DELIM
 	 * @throws IOException Signals that an I/O exception has occurred. Generally
@@ -217,8 +208,6 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 	 * This method should be called when a HELLO message has been received from the
 	 * client. Changes the state of this client handler.
 	 *
-	 * @requires description != null, state = State.UNINITIALIZED, out !- null
-	 * @ensures state = State.NO_USERNAME.
 	 * @param description: the description of the server
 	 * @throws IOException Signals that an I/O exception has occurred. Generally
 	 *                     indicates client has disconnected.
@@ -236,8 +225,6 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 	 * has the same name. Changes the state of this client handler to allow for
 	 * reading initialized protocols. Sets the name variable of this client.
 	 *
-	 * @requires newUser != null, state = State.NO_USERNAME, out != null
-	 * @requires name = newUser, state = State.INITIALIZED.
 	 * @param newUser: the user name of client
 	 * @throws IOException Signals that an I/O exception has occurred. Generally
 	 *                     indicates client has disconnected.
@@ -254,7 +241,6 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 	 * to the connected client. This method should only be called after
 	 * CollectoServer.addClient() to confirm that a user exists with the same name.
 	 *
-	 * @requires existingUser != null, state = STATE.NO_USERNAME, out != null
 	 * @param existingUser: the existing user name submitted by the client.
 	 * @throws IOException Signals that an I/O exception has occurred. Generally
 	 *                     indicates client has disconnected.
@@ -268,8 +254,6 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 	 * Reads the passed parameter and replies to the protocol messages of LIST,
 	 * QUEUE, and MOVE (when state == IN_GAME).
 	 *
-	 * @requires args != null, state != State.UNINITIALZED, state !=
-	 *           State.NO_USERNAME.
 	 * @param args: the message from the client split by the Communications.DELIM.
 	 * @throws IOException Signals that an I/O exception has occurred. Generally
 	 *                     indicates client has disconnected.
@@ -295,7 +279,6 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 	 * Implements the LIST protocol and sends a LIST message containing all of the
 	 * clients connected and intialized to the server.
 	 *
-	 * @requires server.getUsers() != null, state = State.INITIALIZED.
 	 * @throws IOException Signals that an I/O exception has occurred. Generally
 	 *                     indicates client has disconnected.
 	 */
@@ -307,8 +290,6 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 	/**
 	 * Implements the QUEUE protocol adds the client to the server queue for
 	 * matchmaking.
-	 * 
-	 * @requires state = State.INITIALIZED.
 	 */
 	private void queue() {
 		server.queue(this);
@@ -317,7 +298,6 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 	/**
 	 * Implements the MOVE protocol and calls the game to make the passed move.
 	 *
-	 * @requires game != null, state == State.IN_GAME
 	 * @param move: the move to be played as an Integer array.
 	 */
 	private void receiveMove(int[] move) {
@@ -327,7 +307,6 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 	/**
 	 * Implements the MOVE protocol and sends the passed move to the client.
 	 *
-	 * @requires move != null, out != null.
 	 * @param move: the move to be sent to the client as an Integer array.
 	 */
 	public void sendMove(int[] move) {
@@ -347,8 +326,6 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 	 * handler and returns the state to INITIALIZED. This method should only be
 	 * called when this client handler is in a game.
 	 *
-	 * @requires State.IN_GAME, condition != null, out != null.
-	 * @ensures game = null, state = State.INITIALIZED.
 	 * @param condition: the description of the condition for the game over.
 	 */
 	// is only called after initialization (is a precondition)
@@ -366,7 +343,6 @@ public class CollectoClientHandler extends CollectoNetworker implements Runnable
 	 * Shows message with prepended user name. This method is used to distinguish
 	 * between different client handlers on the server console.
 	 *
-	 * @requires msg != null.
 	 * @param msg: the message to be written to the console.
 	 */
 	private void showMessage(String msg) {

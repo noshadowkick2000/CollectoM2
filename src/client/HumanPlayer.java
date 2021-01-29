@@ -15,8 +15,7 @@ public class HumanPlayer implements CollectoClientPlayer {
 	 * Return the move to be played by the HumanPlayer on the passed Board. This
 	 * method will block while waiting for the user to input the move. Method will
 	 * not return unless valid move has been inputed.
-	 * 
-	 * @requires board != null.
+	 *
 	 * @param board: the Board on which the move is to be played
 	 * @return an Integer array of size 1 or 2 containing the move to be played
 	 */

@@ -45,9 +45,6 @@ public class CollectoServerGame extends Collecto {
 	/**
 	 * Instantiates a new CollectoServerGame.
 	 *
-	 * @requires p1 != null, p2 != null.
-	 * @ensures this.gameId = gamedId, playingClients.size() == 2,
-	 *          playingClients.add(p1), playingClients.add(p2), board = new Board().
 	 * @param gameId: the id to assign to gameId.
 	 * @param p1:     the CollectoClientHandler assigned as player 1.
 	 * @param p2:     the CollectoClientHandler assigned as player 2.
@@ -65,8 +62,6 @@ public class CollectoServerGame extends Collecto {
 	 * Removes the passed client handler from the List playingClients and calls the
 	 * gameOver() method with a DISCONNECT argument.
 	 *
-	 * @requires client != null.
-	 * @ensures playingClients.remove(client).
 	 * @param client: the client handler associated with the disconnected client.
 	 */
 	synchronized public void disconnectClient(CollectoClientHandler client) {
@@ -79,9 +74,6 @@ public class CollectoServerGame extends Collecto {
 	 * Starts a new game by calling the NEWGAME implementation of both client
 	 * handlers, passing the order and name of the players and the state of the grid
 	 * of the Board.
-	 * 
-	 * @requires playingClients.size() == 2, for (CollectoClientHandler cch :
-	 *           playingClients){cch != null}.
 	 */
 	synchronized public void newGame() {
 
@@ -100,9 +92,6 @@ public class CollectoServerGame extends Collecto {
 	 * game is over. If a move is played out of turn or is invalid, the ERROR
 	 * implementation of the client handler who sent the move will be called.
 	 *
-	 * @requires move != null, playingClients.contains(player), board != null,
-	 *           playingClients.size() == 2, for (CollectoClientHandler cch :
-	 *           playingClients){cch != null}.
 	 * @param move:   the move sent by the client as an Integer array.
 	 * @param player: the client handler who requested the move.
 	 */
@@ -136,9 +125,6 @@ public class CollectoServerGame extends Collecto {
 	 * client handlers, depending on the condition passed as a parameter. This
 	 * method results in all references to this game to be cleared.
 	 *
-	 * @requires condition != null, playingClients.size() == 2, for
-	 *           (CollectoClientHandler cch : playingClients){cch != null}.
-	 * @ensures playingClients.size() == 0.
 	 * @param condition: the condition for ending the game as a Condition ENUM.
 	 */
 	synchronized public void gameOver(Condition condition) {
@@ -185,7 +171,6 @@ public class CollectoServerGame extends Collecto {
 	 * Count the points of both players and call the gameOver() method with the
 	 * appropriate Condition based on the amount of points per player.
 	 *
-	 * @requires board != null.
 	 */
 	public void getWinner() {
 

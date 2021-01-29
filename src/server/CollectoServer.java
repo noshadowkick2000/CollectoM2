@@ -68,7 +68,6 @@ public class CollectoServer implements Runnable {
 	/**
 	 * Creates the server socket on the local host using the passed port.
 	 *
-	 * @ensures ss = new ServerSocket(oirt, 0, InetAdress.getLocalHost().
 	 * @param port: the port on which to create the ServerSocket
 	 * @throws UnknownHostException the unknown host exception
 	 * @throws IOException          Signals that an I/O exception has occurred.
@@ -100,7 +99,6 @@ public class CollectoServer implements Runnable {
 	/**
 	 * Creates a new client handler.
 	 *
-	 * @requires ss != null.
 	 * @throws IOException Signals that an I/O exception has occurred. Generally
 	 *                     indicates client has disconnected.
 	 */
@@ -124,16 +122,15 @@ public class CollectoServer implements Runnable {
 	 * the client is unique. Only call this method once the client has sent the
 	 * HELLO protocol.
 	 *
-	 * @requires client != null, userName != null
-	 * @ensures connectedClients.add(client);
 	 * @param client: the client handler assigned to the client.
 	 * @return true if user name is unique and client has been added to
 	 *         connectedClients, else false
 	 */
+	// returns true if succesful
 	synchronized public boolean addClient(CollectoClientHandler client, String userName) {
 		if (hasExistingLogin(userName))
 			return false;
-		CollectoInterface.showMessage("Client " + userName + " initialized");
+		CollectoInterface.showMessage("Client " + client.getName() + " initialized");
 		connectedClients.add(client);
 		return true;
 	}
@@ -141,10 +138,7 @@ public class CollectoServer implements Runnable {
 	/**
 	 * Removes the client from the List of connectedClients and queuedClients in
 	 * case the client handler was in the queue as well.
-	 * 
-	 * @requires client != null, connectedClients.contains(client).
-	 * @ensures connectedClients.remove(client), queuedClients.remove(client) if
-	 *          (queuedClients.contains(client)).
+	 *
 	 * @param client: the client handler assigned to the client.
 	 */
 	synchronized public void removeClient(CollectoClientHandler client) {
@@ -157,13 +151,10 @@ public class CollectoServer implements Runnable {
 
 	/**
 	 * Implements the QUEUE protocol. Add the passed CollectoClientHandler to the
-	 * queuedClients List and checks whether there are enough people in the queue to
-	 * start a newgame. If so, calls startNewGame().
+	 * queuedClients List and check whether there are enough people in the queue to
+	 * start a newgame. If so, call startNewGame()
 	 *
-	 * @requires client != null.
-	 * @ensures queuedClients.remove(client) if queuedClients.contains(client),
-	 *          queuedClients.add(client) if !queuedClients.contains(client).
-	 * @param client: the client handler assigned to the client.
+	 * @param client the client
 	 */
 	synchronized public void queue(CollectoClientHandler client) {
 
@@ -199,8 +190,6 @@ public class CollectoServer implements Runnable {
 
 	/**
 	 * Closes the ServerSocket of this server and exits the program.
-	 * 
-	 * @ensures ss.close().
 	 */
 	public void exit() {
 		try {
@@ -219,7 +208,6 @@ public class CollectoServer implements Runnable {
 	 * Checks for existing username in connectedClients equal to the passed
 	 * parameter.
 	 *
-	 * @requires user != null.
 	 * @param user: the user name to which to compare the existing users names.
 	 * @return true if there is an existing client connected with the same user name
 	 *         as user.
@@ -237,9 +225,6 @@ public class CollectoServer implements Runnable {
 	 * Starts new game by creating a CollectoServerGame instance and assigning the 2
 	 * lowest client handler in the queue to the game. Also removes these client
 	 * handlers from the queue.
-	 * 
-	 * @requires queuedClients.size() > 1.
-	 * @ensures first two clients from queuedClients are removed.
 	 */
 	synchronized private void startNewGame() {
 		CollectoClientHandler playerOne = queuedClients.get(0);
