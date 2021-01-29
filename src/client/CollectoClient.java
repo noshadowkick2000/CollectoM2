@@ -93,6 +93,8 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 	/**
 	 * Displays the winner of the current local game.
 	 *
+	 * @requires game != null, game.board != null, game.board.noMovesLeft(),
+	 *           loginName != null.
 	 * @param winnerName, contains the name of the winner sent by the server.
 	 */
 	public void showWinner(String winnerName) {
@@ -160,8 +162,10 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 	}
 
 	/**
-	 * Connects the client to the server and initializes sock, in, and out
+	 * Connects the client to the server and initializes sock, in, and out.
 	 *
+	 * @requires host != null.
+	 * @ensures sock != null, in != null, out != null if successful.
 	 * @param host: 2 dimensional String array, with host[0] being the host address
 	 *              of the host in numerical form and host[1] being the port of the
 	 *              host through which to communicate.
@@ -191,6 +195,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 	 * Sets the type of CollectoClientPlayer to be used on this client, using
 	 * playerType.
 	 *
+	 * @ensures localPlayer != null.
 	 * @param playerType: should be a String inside of PLAYER_OPTIONS.
 	 * @return true if successful and playerType != null, else false.
 	 */
@@ -219,7 +224,8 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 
 	/**
 	 * Start initialization client-server connection with the HELLO protocol.
-	 *
+	 * 
+	 * @requires out != nul, clientDescription != null.
 	 * @param clientDescription: the client description.
 	 * @throws IOException               Signals that an I/O exception has occurred.
 	 *                                   Generally indicates that the connection has
@@ -248,7 +254,8 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 
 	/**
 	 * Complete initialization client-server connection with the LOGIN protocol.
-	 *
+	 * 
+	 * @requires out != null, loginName != null.
 	 * @param loginName the user name with which to log on to the server.
 	 * @return true if successful and loginName is not an existing name on the
 	 *         server.
@@ -283,6 +290,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 	 * Activates the methods associated with the following server protocols: LIST,
 	 * NEWGAME, MOVE, GAMEOVER, and ERROR.
 	 *
+	 * @requires args != null, args.length > 0.
 	 * @param args: the full message from the server in array form.
 	 * @throws IOException Signals that an I/O exception has occurred. Generally
 	 *                     indicates that the connection has closed.
@@ -357,6 +365,8 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 	/**
 	 * Implements the QUEUE protocol and sends a request to the server to queue.
 	 *
+	 * @requires out != null.
+	 * @ensures inQueue = !inQueue.
 	 * @throws IOException Signals that an I/O exception has occurred. Generally
 	 *                     indicates that the connection has closed.
 	 */
@@ -371,6 +381,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 	 * the server. Reads the values of the list and prints them in human readable
 	 * form
 	 *
+	 * @requires out != null, list != null, list.length > 1.
 	 * @param list: the full message from the server containing the LIST message and
 	 *              the names of all connected clients.
 	 * @throws IOException Signals that an I/O exception has occurred. Generally
@@ -389,6 +400,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 	 * Implements the LIST protocol and sends a request to the server to send back a
 	 * list of connected clients.
 	 *
+	 * @requires out != null.
 	 * @throws IOException Signals that an I/O exception has occurred. Generally
 	 *                     indicates that the connection has closed.
 	 */
@@ -401,6 +413,8 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 	 * message to make a move on the local game. Will call sendMove() if it's the
 	 * local player's turn.
 	 *
+	 * @requires game != null, game.board != null.
+	 * @ensures localPlayerTurn = !localPlayerTurn.
 	 * @param move: the move to be made on the board as an integer array.
 	 * @throws IOException Signals that an I/O exception has occurred. Generally
 	 *                     indicates that the connection has closed.
@@ -423,6 +437,8 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 	 * move to be played by the local player. This move is returned from calling
 	 * getMove() from the localPlayer
 	 *
+	 * @requires lobbyThread != null, out != null, localPlayer != null, game !=
+	 *           null, game.board != null.
 	 * @throws IOException Signals that an I/O exception has occurred. Generally
 	 *                     indicates that the connection has closed.
 	 */
@@ -438,6 +454,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		}
 
 		int[] move = localPlayer.getMove(game.board);
+		CollectoInterface.showMessage(Board.moveToReadableString(move));
 		writeMessage(moveIntToString(move));
 	}
 
@@ -446,6 +463,9 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 	 * parameters of the NEWGAME protocol, which contains the layout of the board,
 	 * are passed through the parameter and used to initialize the local game
 	 *
+	 * @requires gridPlayers != null, gridPlayer.length == 52
+	 * @ensures game != null, game.board != null, gameAvailable = true, inQueue =
+	 *          false, localIsFirstPlayer = firstPlater.equals(loginName).
 	 * @param gridPlayers: full message from the server containing the MOVE
 	 *                     protocol, the board state, and the players in their
 	 *                     playing order
@@ -483,6 +503,8 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 	 * Implements the GAMEOVER protocol and is called when GAMEOVER is received.
 	 * Will cleanup the local game and start a new lobby TUI.
 	 *
+	 * @requires out != null, condition.length > 1.
+	 * @ensures game = null, game.board = null, gameAvailable = false.
 	 * @param condition: the full message from the server containing the GAMEOVER
 	 *                   protocol, the win condition and possibly the winner's user
 	 *                   name.
@@ -502,6 +524,7 @@ public class CollectoClient extends CollectoNetworker implements Runnable {
 		}
 
 		game.board = null;
+		game = null;
 		CollectoInterface.showMessage("Game over, you will be sent back to the lobby");
 		gameAvailable = false;
 

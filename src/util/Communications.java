@@ -1,47 +1,49 @@
 package util;
 
-// TODO: Auto-generated Javadoc
 /**
- * The Class Communications.
+ * The Class Communications. Contains all of the protocols for the Collecto
+ * assignment as per the given instructions. Full explanation of the usage can
+ * be found on:
+ * https://gitlab.utwente.nl/tvandijk/collecto-communications-protocol/-/blob/master/commands.md
  */
 public class Communications {
 
-	/** The Constant H. */
+	/** Protocol for HELLO. */
 	public static final String H = "HELLO";
-	
-	/** The Constant L. */
+
+	/** Protocol for LOGIN. */
 	public static final String L = "LOGIN";
-	
-	/** The Constant AL. */
+
+	/** Protocol for HELLO.ALREADYLOGGEDIN. */
 	public static final String AL = "ALREADYLOGGEDIN";
-	
-	/** The Constant NG. */
+
+	/** Protocol for NEWGAME. */
 	public static final String NG = "NEWGAME";
-	
-	/** The Constant GO. */
+
+	/** Protocol for GAMEOVER. */
 	public static final String GO = "GAMEOVER";
-	
-	/** The Constant DRAW. */
+
+	/** Protocol for GAMEOVER~DRAW. */
 	public static final String DRAW = "DRAW";
-	
-	/** The Constant VICTORY. */
+
+	/** Protocol for GAMEOVER~VICTORY. */
 	public static final String VICTORY = "VICTORY";
-	
-	/** The Constant DISCONNECT. */
+
+	/** Protocol for GAMEOVER~DISCONNECT. */
 	public static final String DISCONNECT = "DISCONNECT";
-	
-	/** The Constant LS. */
+
+	/** Protocol for LIST. */
 	public static final String LS = "LIST";
-	
-	/** The Constant Q. */
+
+	/** Protocol for QUEUE. */
 	public static final String Q = "QUEUE";
-	
-	/** The Constant M. */
+
+	/** Protocol for MOVE. */
 	public static final String M = "MOVE";
-	
-	/** The Constant DELIM. */
+
+	/** Message delimiter for all protocol messages. */
 	public static final String DELIM = "~";
-	
-	/** The Constant ERR. */
+
+	/** Protocol for ERROR. */
 	public static final String ERR = "ERROR";
 }

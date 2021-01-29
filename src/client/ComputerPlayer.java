@@ -15,6 +15,7 @@ public class ComputerPlayer implements CollectoClientPlayer {
 	 * Instantiates a new computer player with a given Strategy to use. The strategy
 	 * determines what moves the ComputerPlayer will play
 	 *
+	 * @requires strategy != null.
 	 * @param strategy: the strategy for the ComputerPlayer. Valid strategy classes
 	 *                  include: EasyStrategy, MediumStrategy, and HardStrategy.
 	 */
@@ -24,7 +25,8 @@ public class ComputerPlayer implements CollectoClientPlayer {
 
 	/**
 	 * Returns the move to be played by this ComputerPlayer.
-	 *
+	 * 
+	 * @requires board != null.
 	 * @param board: the Board on which the move will be played
 	 * @return an Integer array of size 1 or 2, containing the move to be played.
 	 */

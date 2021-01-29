@@ -6,7 +6,6 @@ import java.io.IOException;
 
 import game.Board;
 
-// TODO: Auto-generated Javadoc
 /**
  * The Class CollectoNetworker.
  */
@@ -19,10 +18,12 @@ public abstract class CollectoNetworker {
 	public BufferedReader in;
 
 	/**
-	 * Write message.
+	 * Writes the passed message to the socket output.
 	 *
-	 * @param msg the msg
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @requires msg != null, out != null.
+	 * @param msg: the message to be sent.
+	 * @throws IOException Signals that an I/O exception has occurred. Generally
+	 *                     indicates that socket has disconnected.
 	 */
 	public void writeMessage(String msg) throws IOException {
 		out.write(msg);
@@ -31,20 +32,27 @@ public abstract class CollectoNetworker {
 	}
 
 	/**
-	 * Await message.
+	 * Awaits single line from the socket input and returns it. This method may
+	 * block while waiting for input from the socket.
 	 *
-	 * @return the string
-	 * @throws IOException Signals that an I/O exception has occurred.
+	 * @requires in != null.
+	 * @return a String containing one line of a message from the socket input.
+	 * @throws IOException Signals that an I/O exception has occurred. Generally
+	 *                     indicates that socket has disconnected.
 	 */
 	public String awaitMessage() throws IOException {
 		return in.readLine();
 	}
 
 	/**
-	 * Move int to string.
+	 * Converts the passed Integer array to a single String to use in the MOVE
+	 * protocol.
 	 *
-	 * @param move the move
-	 * @return the string
+	 * @requires move != null.
+	 * @param move: an Integer array adhering to the move format defined in
+	 *              Board.Move.move
+	 * @return a String containing the move with each move being separated by a
+	 *         Communications.DELIM, as per the MOVE protocol.
 	 */
 	public String moveIntToString(int[] move) {
 		String moveMessage = Communications.M;
@@ -54,12 +62,15 @@ public abstract class CollectoNetworker {
 		return moveMessage;
 	}
 
-	// for convenience, this string array includes the MOVE at the start of the
 	/**
-	 * Move string to int.
+	 * Converts the passed move String array containing the full MOVE protocol
+	 * message into an Integer array containing said move.
 	 *
-	 * @param move the move
-	 * @return the int[]
+	 * @requires move != null.
+	 * @param move: a String containing the move with each move being separated by a
+	 *              Communications.DELIM, as per the MOVE protocol.
+	 * @return an Integer array adhering to the move format defined in
+	 *         Board.Move.move
 	 */
 	// protocol
 	public int[] moveStringToInt(String[] move) {
@@ -75,10 +86,12 @@ public abstract class CollectoNetworker {
 	}
 
 	/**
-	 * Converts the grid of this Board to a form usable for the NEWGAME protocol
-	 * sent by the server.
+	 * Converts the grid of the passed Board to a form usable for the NEWGAME
+	 * protocol sent by the server.
 	 *
-	 * @return 
+	 * @param board: the board from which to read the grid.
+	 * @return a String containing all of the grids of the passed board, per the
+	 *         NEWGAME protocol.
 	 */
 	static public String toCommunicationString(Board board) {
 		String boardString = "";

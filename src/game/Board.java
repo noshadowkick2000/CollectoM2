@@ -20,7 +20,11 @@ public class Board {
 		/** The Board which results from making this move on the current Board */
 		public Board board;
 
-		/** The move as an Integer array. */
+		/**
+		 * The move as an Integer array. If the move is a single move, the length of the
+		 * array is 1, else the length is 2. This format is used for all functions
+		 * handling move logic.
+		 */
 		public int[] move;
 
 		/** The balls which are removed from the board as a result of this move. */
@@ -28,7 +32,10 @@ public class Board {
 
 		/**
 		 * Instantiates a new Move for a single move
-		 *
+		 * 
+		 * @requires board != null, move != null, gainedBalls != null.
+		 * @ensures this.board = board, this.move = new int[] {move}, this.gainedBalls =
+		 *          gainedBalls.
 		 * @param board:       the resulting Board
 		 * @param move:        the move
 		 * @param gainedBalls: the gained balls
@@ -43,6 +50,9 @@ public class Board {
 		/**
 		 * Instantiates a new Move for a double move.
 		 *
+		 * @requires board != null, move != null, gainedBalls != null.
+		 * @ensures this.board = board, this.move = move, this.gainedBalls =
+		 *          gainedBalls.
 		 * @param board:       the resulting Board
 		 * @param move:        the move
 		 * @param gainedBalls: the gained balls
@@ -118,6 +128,9 @@ public class Board {
 
 	/**
 	 * Instantiates a new board and generates a random valid starting grid.
+	 * 
+	 * @ensures for (COLOUR c : grid){c != null}, !boardHasNeighbours(),
+	 *          grid[CENTER] = COLOUR.EMPTY.
 	 */
 	public Board() {
 		while (true) {
@@ -131,6 +144,9 @@ public class Board {
 	/**
 	 * Instantiates a new board and assigns the values of boardValues to the grid.
 	 *
+	 * @requires boardValues != null, boardValues.length == 49, boardValues[CENTER]
+	 *           == COLOUR.EMPTY.
+	 * @ensures for (COLOUR c : grid){c != null}.
 	 * @param boardValues: the values of the grid
 	 */
 	public Board(int[] boardValues) {
@@ -151,7 +167,11 @@ public class Board {
 	 * its own global variables. This constructor only used by deepCopy(). This
 	 * constructor does not calculate the next moves since it is a copy of the
 	 * current Board.
-	 *
+	 * 
+	 * @requires grid != null, nextMoves != null, p1Balls != null, p2Balls != null.
+	 * @ensures this.grid = grid.clone(), this.possibleNextMoves.addAll(nextMoves),
+	 *          this.p1Balls.addAll(p1Balls) this.p2Balls.addAll(p2Balls).
+	 *          this.firstPlayerTurn = firstPlayerTurn;
 	 * @param grid:            the grid
 	 * @param nextMoves:       the next possible moves
 	 * @param p1Balls:         p1 balls
@@ -170,19 +190,18 @@ public class Board {
 
 	/**
 	 * Play the passed move on the current Board. isValidMove() should be called
-	 * before calling this method
-	 *
+	 * before calling this method on the server.
+	 * 
+	 * @requires isValidMove(int[] move).
+	 * @ensures grid = findMove(move) if findMove(move) != null,
+	 *          p1Balls.addAll(m.gainedBalls) if firstPlayerTurn,
+	 *          p2Balls.addAll(m.gainedBalld) if !firstPlayerTurn.
 	 * @param move: the move to be played on the Board.
 	 */
 	public void makeMove(int[] move) {
 		// search for calculated legal move and copy it's grid
 		// recalculate next moves
 		Move m = findMove(move);
-
-		// if move was not in calculated moves, it could not have been legal
-		if (m == null) {
-			return;
-		}
 
 		grid = m.board.grid;
 		if (firstPlayerTurn) {
@@ -222,7 +241,7 @@ public class Board {
 	 * Checks whether the current grid on the Board has at least two balls of the
 	 * same COLOUR, which are not COLOUR.EMPTY, and are adjacent to each other
 	 * horizontally or vertically.
-	 *
+	 * 
 	 * @return true if the current grid has at least 2 spaces adjacent to each other
 	 *         which have the same COLOUR, and that said COLOUR is not COLOUR.EMPTY
 	 */
@@ -262,7 +281,7 @@ public class Board {
 
 	/**
 	 * Converts the grids of the board to a readable form.
-	 *
+	 * 
 	 * @return the String representation of this Board
 	 */
 	public String toString() {
@@ -281,7 +300,8 @@ public class Board {
 
 	/**
 	 * Return the passed move as Integer array as a human readable string.
-	 *
+	 * 
+	 * @requires move != null.
 	 * @param move: the move as an Integer array
 	 * @return String representation of the Integer array representation of a move
 	 */
@@ -327,6 +347,7 @@ public class Board {
 	 * Finds the Move inside of the List possibleNextMoves containing the passed
 	 * Integer array as its internal variable Move.move.
 	 *
+	 * @requires move != null.
 	 * @param move: the move to be searched for as an Integer array
 	 * @return Move corresponding to the move passed as a parameter. If no Move in
 	 *         possibleNextMoves corresponds to the passed parameter, this will
@@ -343,6 +364,9 @@ public class Board {
 
 	/**
 	 * Generates board and initializes the grid of this Board.
+	 * 
+	 * @ensures for (COLOUR c : grid){c != null}, grid[CENTER] = COLOUR.EMPTY,
+	 *          !boardHasNeighbours().
 	 */
 	private void generateBoard() {
 		// create list with 8 items per colour
@@ -406,6 +430,7 @@ public class Board {
 	 * of the passed index and the COLOUR is not COLOUR.EMPTY, or adjacent to the
 	 * same COLOUR horizontally or vertically.
 	 *
+	 * @requires index > -1, index < grid.length.
 	 * @param index: the index from which to start searching ahead.
 	 * @return index of the next space in the grid which is not equal to the COLOUR
 	 *         of the passed index, is not COLOUR.EMPTY, or adjacent to its own
@@ -430,6 +455,7 @@ public class Board {
 	 * passed index which are equal to the passed COLOUR. If there are no
 	 * neighbours, return -1.
 	 *
+	 * @requires index > -1, index < grid.length.
 	 * @param index:  the index of the space to check for adjacent spaces
 	 * @param colour: the COLOUR for which to compare
 	 * @return returns -1 if no same colour neighbours, else returns index of space
@@ -473,6 +499,7 @@ public class Board {
 	 * passed index which are equal to the COLOUR of the passed index. If there are
 	 * no neighbours, return -1.
 	 *
+	 * @requires index > -1, index < grid.length.
 	 * @param index: the index of the space to check for adjacent spaces
 	 * @return returns -1 if no same colour neighbours, else returns index of space
 	 *         which has same COLOUR as passed index
@@ -484,7 +511,8 @@ public class Board {
 
 	/**
 	 * Checks whether the passed index is equals to the passed COLOUR.
-	 *
+	 * 
+	 * @requires index > -1, index < grid.length, colour != null.
 	 * @param colour:         the COLOUR to compare with the COLOUR of
 	 *                        grid[neighbourIndex]
 	 * @param neighbourIndex: the index of the square to be compared against the
@@ -504,6 +532,7 @@ public class Board {
 	 * calculateMoves(). This method is only used to calculate the next moves, not
 	 * to have a player actually make a move.
 	 *
+	 * @requires move > -1, move < BOARD_SIZE * 4.
 	 * @param move: the move to try to make on the current Board
 	 * @return a List containing all of the balls/COLOURs which are removed from the
 	 *         Board after making the passed move. Will return null if the move was
@@ -529,6 +558,80 @@ public class Board {
 		}
 
 		return removeBalls();
+	}
+
+	/**
+	 * Shift each space with a non empty COLOUR on the given row or column into the
+	 * given direction.
+	 *
+	 * @requires start > -1, start < grid.length, direction == 1 || direction == -1,
+	 *           step == 1 || direction = BOARD.SIZE.
+	 * @ensures all COLOURs in the designated line are moved in the given direction.
+	 * @param start     the index from which to start shifting spaces
+	 * @param direction the direction towards where the spaces are shifting,
+	 *                  positive for moving spaces to the right and down and
+	 *                  negative for left and up.
+	 * @param step      the step between the indices which are shifted: should be 1
+	 *                  for horizontal shifts and BOARD_SIZE for a vertical shift.
+	 */
+	private void moveLine(int start, int direction, int step) {
+		int counter = 0;
+		while (counter != BOARD_SIZE) {
+			int index = start + (direction * counter * step);
+			if (!grid[index].equals(COLOUR.EMPTY)) {
+				int moveCounter = 1;
+				while (true) {
+					int previous = index - (direction * moveCounter * step);
+					int current = index - (direction * (moveCounter - 1) * step);
+					if (previous < 0 || previous > grid.length - 1 || previous == start - direction) {
+						break;
+					}
+					if (!grid[previous].equals(COLOUR.EMPTY)) {
+						break;
+					}
+					grid[previous] = grid[current];
+					grid[current] = COLOUR.EMPTY;
+					moveCounter++;
+				}
+			}
+			counter++;
+		}
+	}
+
+	/**
+	 * Move horizontal line of grid. Calls moveLine() to shift the COLOURs of a row
+	 * to the left or right depending on the passed parameter.
+	 *
+	 * @requires n > -1, n < BOARD_SIZE * 2.
+	 * @param moveLeft: true if the row should be shifted to the left.
+	 * @param n:        the index of the move to be played, see also the move
+	 *                  protocols of Collecto.
+	 */
+	private void moveHorizontal(boolean moveLeft, int n) {
+		// int counter = 0;
+		int start = moveLeft ? n * BOARD_SIZE : n * BOARD_SIZE + (BOARD_SIZE - 1);
+		int direction = moveLeft ? 1 : -1;
+		int step = 1;
+
+		moveLine(start, direction, step);
+	}
+
+	/**
+	 * Move vertical line of grid. Calls moveLine() to shift the COLOURs of a column
+	 * to up or down depending on the passed parameter.
+	 *
+	 * @requires n > 13, n < BOARD_SIZE * 4.
+	 * @param moveLeft: true if the column should be shifted upwards.
+	 * @param n:        the index of the move to be played, see also the move
+	 *                  protocols of Collecto.
+	 */
+	private void moveVertical(boolean moveUp, int n) {
+		// int counter = 0;
+		int start = moveUp ? n : n + (BOARD_SIZE * (BOARD_SIZE - 1));
+		int direction = moveUp ? 1 : -1;
+		int step = BOARD_SIZE;
+
+		moveLine(start, direction, step);
 	}
 
 	/**
@@ -584,6 +687,7 @@ public class Board {
 	/**
 	 * Checks if the given row or column has an empty space.
 	 *
+	 * @requires move > -1, move < BOARD_SIZE * 4.
 	 * @param move: the column or row to check: 0 to 13 checks columns, 14 to 27
 	 *              checks rows
 	 * @return true if there is an empty space in either the row or column checked.
@@ -615,6 +719,7 @@ public class Board {
 	/**
 	 * Check if horizontal row has empty space.
 	 *
+	 * @requires n > -1, n < BOARD_SIZE * 2.
 	 * @param n: the index of the move corresponding to the row
 	 * @return true if row in grid contains at least one space with COLOUR.EMPTY.
 	 */
@@ -635,6 +740,7 @@ public class Board {
 	/**
 	 * Check if vertical column has empty space.
 	 *
+	 * @requires n > 13, n < BOARD_SIZE * 4.
 	 * @param n: the index of the move corresponding to the column
 	 * @return true if column in grid contains at least one space with COLOUR.EMPTY.
 	 */
@@ -649,75 +755,6 @@ public class Board {
 			}
 		}
 		return false;
-	}
-
-	/**
-	 * Shift each space with a non empty COLOUR on the given row or column into the
-	 * given direction.
-	 *
-	 * @param start     the index from which to start shifting spaces
-	 * @param direction the direction towards where the spaces are shifting,
-	 *                  positive for moving spaces to the right and down and
-	 *                  negative for left and up.
-	 * @param step      the step between the indices which are shifted: should be 1
-	 *                  for horizontal shifts and BOARD_SIZE for a vertical shift.
-	 */
-	private void moveLine(int start, int direction, int step) {
-		int counter = 0;
-		while (counter != BOARD_SIZE) {
-			int index = start + (direction * counter * step);
-			if (!grid[index].equals(COLOUR.EMPTY)) {
-				int moveCounter = 1;
-				while (true) {
-					int previous = index - (direction * moveCounter * step);
-					int current = index - (direction * (moveCounter - 1) * step);
-					if (previous < 0 || previous > grid.length - 1 || previous == start - direction) {
-						break;
-					}
-					if (!grid[previous].equals(COLOUR.EMPTY)) {
-						break;
-					}
-					grid[previous] = grid[current];
-					grid[current] = COLOUR.EMPTY;
-					moveCounter++;
-				}
-			}
-			counter++;
-		}
-	}
-
-	/**
-	 * Move horizontal line of grid. Calls moveLine() to shift the COLOURs of a row
-	 * to the left or right depending on the passed parameter.
-	 *
-	 * @param moveLeft: true if the row should be shifted to the left.
-	 * @param n:        the index of the move to be played, see also the move
-	 *                  protocols of Collecto.
-	 */
-	private void moveHorizontal(boolean moveLeft, int n) {
-		// int counter = 0;
-		int start = moveLeft ? n * BOARD_SIZE : n * BOARD_SIZE + (BOARD_SIZE - 1);
-		int direction = moveLeft ? 1 : -1;
-		int step = 1;
-
-		moveLine(start, direction, step);
-	}
-
-	/**
-	 * Move vertical line of grid. Calls moveLine() to shift the COLOURs of a column
-	 * to up or down depending on the passed parameter.
-	 *
-	 * @param moveLeft: true if the column should be shifted upwards.
-	 * @param n:        the index of the move to be played, see also the move
-	 *                  protocols of Collecto.
-	 */
-	private void moveVertical(boolean moveUp, int n) {
-		// int counter = 0;
-		int start = moveUp ? n : n + (BOARD_SIZE * (BOARD_SIZE - 1));
-		int direction = moveUp ? 1 : -1;
-		int step = BOARD_SIZE;
-
-		moveLine(start, direction, step);
 	}
 
 	/**
