@@ -104,7 +104,7 @@ public class CollectoServer implements Runnable {
 	 * @throws IOException Signals that an I/O exception has occurred. Generally
 	 *                     indicates client has disconnected.
 	 */
-	synchronized public void createNewHandler() throws IOException {
+	public void createNewHandler() throws IOException {
 		Socket sock = ss.accept();
 		CollectoInterface.showMessage("Client connected");
 		(new Thread((new CollectoClientHandler(sock, this)))).start();
